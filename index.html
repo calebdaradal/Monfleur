@@ -8,7 +8,7 @@
 </head>
 <body>
   <!-- Section 1: Hero -->
-  <section class="hero">
+  <section class="panel hero">
     <div class="hero-content">
       <img src="https://placehold.co/300x100?text=Logo" alt="Honkai: Star Rail Logo" class="logo" />
       <h1>Embark on a New Adventure</h1>
@@ -17,7 +17,7 @@
   </section>
 
   <!-- Section 2: Intro -->
-  <section class="intro">
+  <section class="panel intro">
     <div class="intro-container">
       <div class="intro-text">
         <h2>Discover the Universe</h2>
@@ -32,22 +32,23 @@
     </div>
   </section>
 
-  <!-- Script for fade effect -->
+  <!-- Spacer so scrolling works -->
+  <div class="spacer"></div>
+
+  <!-- Script for crossfade -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("scroll", () => {
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+
+      const hero = document.querySelector(".hero");
       const intro = document.querySelector(".intro");
 
-      window.addEventListener("scroll", () => {
-        const introTop = intro.getBoundingClientRect().top;
-        const windowHeight = window.innerHeight;
+      // scroll progress between 0 → 1
+      let progress = Math.min(Math.max(scrollY / windowHeight, 0), 1);
 
-        // Fade in intro when scrolled into view
-        if (introTop < windowHeight * 0.8) {
-          intro.classList.add("visible");
-        } else {
-          intro.classList.remove("visible");
-        }
-      });
+      hero.style.opacity = 1 - progress;
+      intro.style.opacity = progress;
     });
   </script>
 </body>
