@@ -1,19 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Website</title>
-  <!-- Link to CSS -->
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Honkai: Star Rail Clone</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
-  <!-- Hero Section -->
+  <!-- Section 1: Hero -->
   <section class="hero">
-    <h1>Welcome to My Site</h1>
-    <p>This is the top section with my background image.</p>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <img src="assets/logo.png" alt="Honkai: Star Rail Logo" class="hero-logo" />
+      <h1 class="hero-title">Embark on a New Adventure</h1>
+      <p class="hero-subtitle">A space fantasy RPG from HoYoverse</p>
+    </div>
   </section>
 
+  <!-- Section 2: Game Intro -->
+  <section class="intro">
+    <div class="intro-container">
+      <div class="intro-text">
+        <h2>Discover the Universe</h2>
+        <p>
+          Board the Astral Express and explore the infinite wonders of the galaxy.
+          Meet new companions, face thrilling adventures, and uncover hidden secrets.
+        </p>
+      </div>
+      <div class="intro-media">
+        <img src="assets/intro-image.jpg" alt="Game Artwork" />
+        <!-- If you want video instead:
+        <video autoplay muted loop>
+          <source src="assets/trailer.mp4" type="video/mp4" />
+        </video> -->
+      </div>
+    </div>
+  </section>
 </body>
 </html>
+
