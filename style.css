@@ -13,17 +13,22 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  position: relative; /* allows logo positioning */
 }
 
 /* Hero Section */
 .hero {
   background: url("https://placehold.co/1200x800?text=Hero+Background") center/cover no-repeat;
   text-align: center;
+  flex-direction: column;
 }
 
 .hero .logo {
-  display: block;
-  margin: 0 auto 1rem;
+  position: absolute;
+  top: 1.5rem;
+  left: 2rem;
+  width: 150px; /* adjust as needed */
+  height: auto;
 }
 
 .hero h1 {
