@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mod Login Test</title>
+</head>
+<body>
+<h1>Mod Login Test Page</h1>
+<button id="loginBtn">Login with GitHub</button>
+
+<script>
+  // 1. List of allowed GitHub usernames (mods)
+  const MODS = ["yourUsername", "otherModUsername"];
+
+  // 2. Button click triggers GitHub login via popup
+  document.getElementById("loginBtn").onclick = () => {
+    // Open GitHub login page
+    const githubLogin = window.open(
+      "https://github.com/login",
+      "GitHub Login",
+      "width=600,height=700"
+    );
+
+    // Poll to check if user is logged in
+    const interval = setInterval(() => {
+      try {
+        // Check for username element (for testing only)
+        const usernameEl = githubLogin.document.querySelector(".Header-link span");
+        if (usernameEl) {
+          const username = usernameEl.textContent.trim();
+          githubLogin.close();
+          clearInterval(interval);
+
+          if (MODS.includes(username)) {
+            document.body.innerHTML = `<h2>Welcome, ${username} (Mod)</h2>`;
+          } else {
+            document.body.innerHTML = `<h2>Access denied</h2>`;
+          }
+        }
+      } catch (e) {
+        // Cross-origin errors are expected until login happens
+      }
+    }, 1000);
+  };
+</script>
+</body>
+</html>
