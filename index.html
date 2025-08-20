@@ -6,6 +6,37 @@
   <title>Honkai: Star Rail Clone</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
+  <script>
+  const MODS = ["yourUsername", "otherModUsername"];
+
+  document.getElementById("loginBtn").onclick = () => {
+    const githubLogin = window.open(
+      "https://github.com/login",
+      "GitHub Login",
+      "width=600,height=700"
+    );
+
+    const interval = setInterval(() => {
+      try {
+        const usernameEl = githubLogin.document.querySelector(".Header-link span");
+        if (usernameEl) {
+          const username = usernameEl.textContent.trim();
+          githubLogin.close();
+          clearInterval(interval);
+
+          if (MODS.includes(username)) {
+            alert(`Welcome, ${username} (Mod)`);
+            window.location.href = "/mod-dashboard.html";
+          } else {
+            alert("Access denied");
+          }
+        }
+      } catch (e) {}
+    }, 1000);
+  };
+</script>
+
 <body>
   <!-- Section 1: Hero -->
   <section class="panel hero">
