@@ -39,21 +39,19 @@ body {
 /* Menu buttons in top-right */
 .menu-buttons {
   position: absolute;
-  top: 100px;  /* move down so they don’t overlap the logo */
-  right: 40px; /* space from right edge */
+  top: 100px;
+  right: 40px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-
-/* Use your parchment image */
 .menu-buttons .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 180px;  /* wider pill */
-  height: 50px;  /* taller */
+  width: 220px; /* adjust to fit your button image */
+  height: 70px; /* adjust to fit your button image */
   background: url("assets/menubutton2.png") no-repeat center/contain;
   font-family: 'Georgia', serif;
   font-size: 1rem;
@@ -63,7 +61,6 @@ body {
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
-/* Hover effect */
 .menu-buttons .btn:hover {
   transform: scale(1.05);
   filter: brightness(1.1);
