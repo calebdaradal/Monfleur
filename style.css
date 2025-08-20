@@ -1,26 +1,9 @@
-/* General Reset */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: #fff;
-}
-
-/* Panels */
-.panel {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  position: relative;
-}
-
 /* Hero Section */
 .hero {
   background: url("assets/fleurwip.png") center/cover no-repeat;
   text-align: center;
   flex-direction: column;
+  position: relative;
 }
 
 .hero .logo {
@@ -32,55 +15,56 @@ body {
 }
 
 .hero-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: absolute;
+  bottom: 5%; /* push content towards bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 .hero h1 {
-  font-size: 3rem;
-  margin: 1rem 0;
+  font-size: 2rem; /* default desktop size */
+  margin: 0.5rem 0;
 }
 
 .hero p {
-  font-size: 1.25rem;
+  font-size: 1rem;
   opacity: 0.9;
 }
 
-/* Intro Section */
-.intro {
-  background: #222;
+/* ✅ Responsive adjustments */
+@media (max-width: 1024px) {
+  .hero h1 {
+    font-size: 1.75rem;
+  }
+  .hero p {
+    font-size: 0.95rem;
+  }
+  .hero .logo {
+    width: 220px; /* shrink logo */
+  }
 }
 
-.intro-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  align-items: center;
-  justify-content: center;
-  max-width: 1200px;
-  margin: 0 auto;
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 1.5rem;
+  }
+  .hero p {
+    font-size: 0.9rem;
+  }
+  .hero .logo {
+    width: 180px;
+  }
 }
 
-.intro-text {
-  flex: 1 1 300px;
-}
-
-.intro-text h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.intro-text p {
-  font-size: 1.1rem;
-  line-height: 1.5;
-}
-
-.intro-media {
-  flex: 1 1 300px;
-}
-
-.intro-media img {
-  max-width: 100%;
-  border-radius: 8px;
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.25rem;
+  }
+  .hero p {
+    font-size: 0.8rem;
+  }
+  .hero .logo {
+    width: 150px;
+  }
 }
