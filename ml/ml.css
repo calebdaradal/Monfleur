@@ -3,17 +3,39 @@ body {
   background: #fafafa;
   margin: 0;
   padding: 1rem;
+  overflow-x: hidden;
 }
 
 h1 {
   color: #333;
 }
 
+input#search {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.masterlist-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.grid-wrapper {
+  overflow: hidden;
+  flex: 1;
+}
+
 #character-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-auto-rows: auto;
+  grid-template-rows: repeat(3, auto); /* show only 3 rows */
   gap: 1rem;
-  margin-top: 1rem;
+  transition: transform 0.4s ease;
 }
 
 .character-card {
@@ -24,3 +46,20 @@ h1 {
   padding: 0.5rem;
 }
 
+.arrow {
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  font-size: 2rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.arrow.left {
+  margin-right: 0.5rem;
+}
+
+.arrow.right {
+  margin-left: 0.5rem;
+}
