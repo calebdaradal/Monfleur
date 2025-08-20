@@ -16,14 +16,13 @@
 
 .hero-content {
   position: absolute;
-  bottom: 5%; /* push content towards bottom */
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 5%;   /* stick near the bottom */
+  width: 100%;  /* take full width */
   text-align: center;
 }
 
 .hero h1 {
-  font-size: 2rem; /* default desktop size */
+  font-size: 2rem;
   margin: 0.5rem 0;
 }
 
@@ -41,7 +40,7 @@
     font-size: 0.95rem;
   }
   .hero .logo {
-    width: 220px; /* shrink logo */
+    width: 220px;
   }
 }
 
