@@ -1,4 +1,5 @@
-/* General Reset */
+/* Base */
+* { box-sizing: border-box; }
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -13,39 +14,46 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  position: relative; /* enables absolute positioning inside */
 }
 
-/* Hero Section */
+/* Hero */
 .hero {
+  position: relative; /* anchor for absolute logo */
   background: url("https://placehold.co/1200x800?text=Hero+Background") center/cover no-repeat;
-  flex-direction: column;
   text-align: center;
 }
 
-/* Logo in top-left */
-.hero-logo {
+.hero .hero-content {
+  max-width: 1000px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+}
+
+/* Logo pinned top-left at full intended size */
+.hero .logo {
   position: absolute;
-  top: 1.5rem;
-  left: 2rem;
-}
-
-.hero-logo img {
-  width: 150px; /* adjust as needed */
+  top: 1rem;
+  left: 1rem;
+  width: 300px;         /* keep the placeholder’s full width */
   height: auto;
+  max-width: none;      /* prevent responsive shrinking */
+  display: block;
 }
 
+/* Headline & subtext */
 .hero h1 {
   font-size: 3rem;
-  margin: 1rem 0;
+  margin: 1rem 0 0.25rem;
 }
-
 .hero p {
   font-size: 1.25rem;
   opacity: 0.9;
 }
 
-/* Intro Section */
+/* Intro */
 .intro {
   background: #222;
 }
@@ -57,9 +65,13 @@ body {
   align-items: center;
   justify-content: center;
   max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
-.intro-text {
+.intro-text,
+.intro-media {
   flex: 1 1 300px;
 }
 
@@ -67,17 +79,18 @@ body {
   font-size: 2rem;
   margin-bottom: 1rem;
 }
-
 .intro-text p {
   font-size: 1.1rem;
   line-height: 1.5;
 }
 
-.intro-media {
-  flex: 1 1 300px;
-}
-
 .intro-media img {
   max-width: 100%;
+  height: auto;
   border-radius: 8px;
+}
+
+/* Optional: scale logo down a bit on very small screens */
+@media (max-width: 420px) {
+  .hero .logo { width: 220px; }
 }
