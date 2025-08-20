@@ -16,7 +16,7 @@ body {
 .hero {
   position: relative;
   height: 100vh;
-  background: url("https://via.placeholder.com/1600x900?text=Hero+Background") no-repeat center center/cover;
+  background: url("https://wallpapers.com/images/featured/black-faded-background-l3dfoa4ffnp5flyr.jpg") no-repeat center center/cover;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,7 +55,7 @@ body {
 
 /* Section 2: Intro */
 .intro {
-  background: #111;
+  background: url("https://static.vecteezy.com/system/resources/previews/006/418/595/non_2x/halftone-tonal-fade-abstract-background-half-tone-pattern-with-smooth-black-and-white-transitions-vector.jpg") no-repeat center center/cover;
   padding: 80px 20px;
 }
 
@@ -66,6 +66,9 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 40px;
+  background: rgba(0, 0, 0, 0.6); /* dark overlay for text readability */
+  padding: 40px;
+  border-radius: 10px;
 }
 
 .intro-text {
@@ -94,4 +97,3 @@ body {
   max-width: 100%;
   border-radius: 8px;
 }
-
