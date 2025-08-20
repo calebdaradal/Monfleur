@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: yourusername/yourrepo   # replace with your repo, e.g. Seucwi-18/Monfleur
+  repo: Seucwi-18/Monfleur   # replace with your repo, e.g. Seucwi-18/Monfleur
   branch: main
   base_url: https://your-auth-proxy.herokuapp.com  # replace with your proxy URL
 
