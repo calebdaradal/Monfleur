@@ -1,20 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Content Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- CSP for Netlify CMS -->
+  <!-- CMS CSP handled in _headers, optional meta tag fallback -->
   <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com;">
 </head>
 <body>
-  <div id="nc-root"></div>
-
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
-    window.CMS_MANUAL_INIT = true;
-    Decap.init();
+    CMS.init({
+      config: '/admin/config.yml'
+    });
   </script>
 </body>
 </html>
+
 
 
 
