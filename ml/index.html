@@ -9,10 +9,54 @@
   <h1>Masterlist</h1>
   <input type="text" id="search" placeholder="Search by name, ID, or owner...">
 
-  <!-- Grid only -->
   <div class="masterlist-container">
     <div class="grid-wrapper">
-      <div id="character-grid"></div>
+      <div id="character-grid">
+        <!-- 🔽 Hard-coded demo cards -->
+        <div class="character-card">
+          <img src="https://via.placeholder.com/180x250?text=Astra" alt="Astra">
+          <h3>Astra</h3>
+          <p>ID: 001</p>
+          <p>Owner: Demo</p>
+        </div>
+        <div class="character-card">
+          <img src="https://via.placeholder.com/180x250?text=Nyx" alt="Nyx">
+          <h3>Nyx</h3>
+          <p>ID: 002</p>
+          <p>Owner: Demo</p>
+        </div>
+        <div class="character-card">
+          <img src="https://via.placeholder.com/180x250?text=Orion" alt="Orion">
+          <h3>Orion</h3>
+          <p>ID: 003</p>
+          <p>Owner: Demo</p>
+        </div>
+        <div class="character-card">
+          <img src="https://via.placeholder.com/180x250?text=Lyra" alt="Lyra">
+          <h3>Lyra</h3>
+          <p>ID: 004</p>
+          <p>Owner: Demo</p>
+        </div>
+        <div class="character-card">
+          <img src="https://via.placeholder.com/180x250?text=Draco" alt="Draco">
+          <h3>Draco</h3>
+          <p>ID: 005</p>
+          <p>Owner: Demo</p>
+        </div>
+        <!-- Extra cards so you can scroll horizontally -->
+        <div class="character-card">
+          <img src="https://via.placeholder.com/180x250?text=Vega" alt="Vega">
+          <h3>Vega</h3>
+          <p>ID: 006</p>
+          <p>Owner: Demo</p>
+        </div>
+        <div class="character-card">
+          <img src="https://via.placeholder.com/180x250?text=Sirius" alt="Sirius">
+          <h3>Sirius</h3>
+          <p>ID: 007</p>
+          <p>Owner: Demo</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -20,6 +64,34 @@
   <button class="arrow left" id="arrow-left">←</button>
   <button class="arrow right" id="arrow-right">→</button>
 
-  <script src="ml.js"></script>
+  <script>
+    // Temporary JS to make arrows slide grid
+    let currentSlide = 0;
+    const itemsPerSlide = 5;
+    const grid = document.getElementById("character-grid");
+
+    function updateSlide() {
+      const offset = -(currentSlide * (100 / itemsPerSlide)) + "%";
+      grid.style.transform = `translateX(${offset})`;
+    }
+
+    document.getElementById("arrow-left").addEventListener("click", () => {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    });
+
+    document.getElementById("arrow-right").addEventListener("click", () => {
+      const totalItems = grid.children.length;
+      const maxSlide = Math.ceil(totalItems / itemsPerSlide) - 1;
+      if (currentSlide < maxSlide) {
+        currentSlide++;
+        updateSlide();
+      }
+    });
+
+    updateSlide();
+  </script>
 </body>
 </html>
