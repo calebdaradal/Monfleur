@@ -34,22 +34,5 @@
 
   <!-- Spacer so scrolling works -->
   <div class="spacer"></div>
-
-  <!-- Script for crossfade -->
-  <script>
-    document.addEventListener("scroll", () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-
-      const hero = document.querySelector(".hero");
-      const intro = document.querySelector(".intro");
-
-      // scroll progress between 0 → 1
-      let progress = Math.min(Math.max(scrollY / windowHeight, 0), 1);
-
-      hero.style.opacity = 1 - progress;
-      intro.style.opacity = progress;
-    });
-  </script>
 </body>
 </html>
