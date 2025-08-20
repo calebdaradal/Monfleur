@@ -1,1 +1,45 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Character Details</title>
+  <link rel="stylesheet" href="ml.css">
+</head>
+<body>
+  <a href="index.html">← Back to Masterlist</a>
+  <div id="character-details"></div>
+
+  <script>
+    // Load data
+    fetch("../data/characters.json")
+      .then(res => res.json())
+      .then(chars => {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
+        const char = chars.find(c => c.id === id);
+
+        const container = document.getElementById("character-details");
+
+        if (!char) {
+          container.innerHTML = "<p>Character not found.</p>";
+          return;
+        }
+
+        container.innerHTML = `
+          <h1>${char.name}</h1>
+          <img src="../${char.image}" style="max-width:300px;">
+          <p><strong>ID:</strong> ${char.id}</p>
+          <p><strong>Owner:</strong> ${char.owner}</p>
+          <p><strong>Status:</strong> ${char.status}</p>
+          <h3>Traits</h3>
+          <ul>${char.traits.map(t => `<li>${t}</li>`).join("")}</ul>
+          <h3>History</h3>
+          <ul>
+            ${char.history.map(h => `<li>${h.date}: ${h.action} (${h.by})</li>`).join("")}
+          </ul>
+        `;
+      });
+  </script>
+</body>
+</html>
