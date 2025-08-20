@@ -6,55 +6,42 @@
   <link rel="stylesheet" href="ml.css">
 </head>
 <body>
-  <h1>Masterlist</h1>
-  <input type="text" id="search" placeholder="Search by name, ID, or owner...">
+  <div class="header">
+    <h1>Masterlist</h1>
+    <input type="text" id="search" placeholder="Search by name, ID, or owner...">
+  </div>
 
   <div class="masterlist-container">
     <div class="grid-wrapper">
       <div id="character-grid">
-        <!-- 🔽 Hard-coded demo cards -->
+        <!-- 🔽 Demo cards -->
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250?text=Astra" alt="Astra">
+          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Astra" alt="Astra">
           <h3>Astra</h3>
-          <p>ID: 001</p>
-          <p>Owner: Demo</p>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250?text=Nyx" alt="Nyx">
+          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Nyx" alt="Nyx">
           <h3>Nyx</h3>
-          <p>ID: 002</p>
-          <p>Owner: Demo</p>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250?text=Orion" alt="Orion">
+          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Orion" alt="Orion">
           <h3>Orion</h3>
-          <p>ID: 003</p>
-          <p>Owner: Demo</p>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250?text=Lyra" alt="Lyra">
+          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Lyra" alt="Lyra">
           <h3>Lyra</h3>
-          <p>ID: 004</p>
-          <p>Owner: Demo</p>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250?text=Draco" alt="Draco">
+          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Draco" alt="Draco">
           <h3>Draco</h3>
-          <p>ID: 005</p>
-          <p>Owner: Demo</p>
         </div>
-        <!-- Extra cards so you can scroll horizontally -->
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250?text=Vega" alt="Vega">
+          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Vega" alt="Vega">
           <h3>Vega</h3>
-          <p>ID: 006</p>
-          <p>Owner: Demo</p>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250?text=Sirius" alt="Sirius">
+          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Sirius" alt="Sirius">
           <h3>Sirius</h3>
-          <p>ID: 007</p>
-          <p>Owner: Demo</p>
         </div>
       </div>
     </div>
@@ -65,7 +52,7 @@
   <button class="arrow right" id="arrow-right">→</button>
 
   <script>
-    // Temporary JS to make arrows slide grid
+    // Simple slideshow logic
     let currentSlide = 0;
     const itemsPerSlide = 5;
     const grid = document.getElementById("character-grid");
