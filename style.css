@@ -32,11 +32,13 @@ body, html {
 }
 
 .menu-buttons img {
-  width: 40px; /* size of buttons */
-  height: auto;
+  width: 40px;       /* force width */
+  height: 40px;      /* force height */
+  object-fit: contain; /* keep proportions inside the box */
   cursor: pointer;
   transition: filter 0.3s ease;
 }
+
 
 .menu-buttons img:hover {
   filter: brightness(70%); /* darken on hover */
