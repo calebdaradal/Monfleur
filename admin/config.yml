@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: seucwi-18/Monfleur
+  repo: Seucwi-18/Monfleur
   branch: main
 
 media_folder: "images/characters"
