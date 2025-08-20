@@ -21,7 +21,6 @@ body {
   padding-bottom: 50px;
   text-align: center;
   color: white;
-  overflow: hidden;
 }
 
 /* Logo in top left */
@@ -52,19 +51,20 @@ body {
   font-size: 18px;
 }
 
-/* Menu buttons on face/apple area */
+/* Menu buttons on right side */
 .menu-buttons {
   position: absolute;
-  top: 35%;   /* adjust this value to move vertically */
-  right: 12%; /* adjust this value to move horizontally */
+  top: 50%;
+  right: 80px;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 20px;
+  transform: translateY(-40%);
 }
 
 .menu-buttons .btn {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   background: url("assets/menubutton2.png") no-repeat center;
   background-size: contain;
   background-color: transparent;
