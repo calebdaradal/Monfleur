@@ -1,1 +1,33 @@
+backend:
+  name: github
+  repo: yourusername/yourrepo   # replace with your repo, e.g. Seucwi-18/Monfleur
+  branch: main
+  base_url: https://your-auth-proxy.herokuapp.com  # replace with your proxy URL
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+collections:
+  - name: "characters"
+    label: "Characters"
+    folder: "content/characters"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Character Name", name: "title", widget: "string" }
+      - { label: "Owner", name: "owner", widget: "string" }
+      - { label: "Image", name: "image", widget: "image" }
+      - { label: "Notes", name: "body", widget: "markdown" }
+
+  - name: "trades"
+    label: "Trades"
+    folder: "content/trades"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Trade ID", name: "id", widget: "string" }
+      - { label: "Character", name: "character", widget: "string" }
+      - { label: "From", name: "from", widget: "string" }
+      - { label: "To", name: "to", widget: "string" }
+      - { label: "Notes", name: "body", widget: "markdow
 
