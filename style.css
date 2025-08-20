@@ -6,104 +6,86 @@
 }
 
 body {
-  font-family: "Arial", sans-serif;
-  color: #fff;
-  background-color: #000;
+  font-family: Arial, sans-serif;
+  color: white;
   overflow-x: hidden;
 }
 
-/* Section 1: Hero */
-.hero {
+/* Section setup */
+section {
   position: relative;
-  height: 100vh;
-  background: url("https://wallpapers.com/images/featured/black-faded-background-l3dfoa4ffnp5flyr.jpg") no-repeat center center/cover;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  overflow: hidden;
 }
 
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.hero-content {
-  position: relative;
+/* Hero section */
+.hero {
+  background: url('https://wallpapers.com/images/featured/black-faded-background-l3dfoa4ffnp5flyr.jpg') 
+              no-repeat center center/cover;
   z-index: 1;
 }
 
-.hero-logo {
-  max-width: 300px;
-  margin-bottom: 20px;
+.hero-content {
+  max-width: 800px;
+  padding: 20px;
 }
 
-.hero-title {
-  font-size: 2.5rem;
+.hero h1 {
+  font-size: 3rem;
   font-weight: bold;
+  margin-bottom: 10px;
 }
 
-.hero-subtitle {
-  font-size: 1.2rem;
-  margin-top: 10px;
+.hero p {
+  font-size: 1.5rem;
   color: #ccc;
 }
 
-/* Section 2: Intro */
+/* Intro section */
 .intro {
-  background: url("https://static.vecteezy.com/system/resources/previews/006/418/595/non_2x/halftone-tonal-fade-abstract-background-half-tone-pattern-with-smooth-black-and-white-transitions-vector.jpg") no-repeat center center/cover;
-  padding: 80px 20px;
+  background: url('https://static.vecteezy.com/system/resources/previews/006/418/595/non_2x/halftone-tonal-fade-abstract-background-half-tone-pattern-with-smooth-black-and-white-transitions-vector.jpg') 
+              no-repeat center center/cover;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.intro.visible {
+  opacity: 1;
 }
 
 .intro-container {
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: 40px;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 40px;
+  justify-content: center;
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+  color: black;
+  background: rgba(255, 255, 255, 0.7);
   border-radius: 10px;
 }
 
 .intro-text {
-  flex: 1 1 400px;
-}
-
-.intro-text h2 {
-  font-size: 2rem;
   margin-bottom: 20px;
 }
 
-.intro-text p {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #ccc;
+.intro-text h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-.intro-media {
-  flex: 1 1 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.intro-text p {
+  font-size: 1.2rem;
 }
 
 .intro-media img {
   max-width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
 }
-
-/* Fade-in animation */
-.fade-in {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 1s ease-out, transform 1s ease-out;
-}
-
-.fade-in.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
