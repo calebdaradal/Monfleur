@@ -1,8 +1,9 @@
 backend:
   name: github
-  repo: Seucwi-18/Monfleur  
+  repo: seucwi-18/Monfleur
   branch: main
-  base_url: dev-wwis53dariqwn1jf.us.auth0.com
+  base_url: https://monfleur.netlify.app/.netlify/functions/auth
+
 
 media_folder: "images/characters"  # optional; create folder if uploading images
 public_folder: "/images/characters"
