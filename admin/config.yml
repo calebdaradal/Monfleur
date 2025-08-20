@@ -1,19 +1,27 @@
 backend:
   name: github
-  repo: your-username/your-repo
+  repo: your-username/your-repo-name
   branch: main
-  auth_scope: repo
-
-media_folder: "assets/uploads"
-public_folder: "/assets/uploads"
+media_folder: "images/characters"
+public_folder: "/images/characters"
 
 collections:
-  - name: "masterlist"
-    label: "Masterlist Entries"
-    folder: "content/masterlist"
+  - name: "characters"
+    label: "Characters"
+    label_singular: "Character"
+    folder: "data/characters"
     create: true
-    slug: "{{slug}}"
+    extension: "json"
+    format: "json"
     fields:
       - { label: "Name", name: "name", widget: "string" }
-      - { label: "Description", name: "description", widget: "text" }
+      - { label: "ID", name: "id", widget: "string" }
+      - { label: "Owner", name: "owner", widget: "string" }
+      - { label: "Status", name: "status", widget: "string" }
       - { label: "Image", name: "image", widget: "image" }
+      - { label: "Traits", name: "traits", widget: "list", field: {label: "Trait", name: "trait", widget: "string"} }
+      - { label: "History", name: "history", widget: "list", fields: [
+          {label: "Date", name: "date", widget: "datetime"},
+          {label: "Action", name: "action", widget: "string"},
+          {label: "By", name: "by", widget: "string"}
+        ]}
