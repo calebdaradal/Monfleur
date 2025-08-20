@@ -4,22 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Honkai: Star Rail Clone</title>
-  <!-- Correct CSS file link -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- Section 1: Hero -->
   <section class="hero">
-    <div class="hero-overlay"></div>
     <div class="hero-content">
-      <img src="https://placehold.co/300x150?text=Logo" alt="Honkai: Star Rail Logo" class="hero-logo" />
-      <h1 class="hero-title">Embark on a New Adventure</h1>
-      <p class="hero-subtitle">A space fantasy RPG from HoYoverse</p>
+      <img src="https://placehold.co/300x100?text=Logo" alt="Honkai: Star Rail Logo" class="logo" />
+      <h1>Embark on a New Adventure</h1>
+      <p>A space fantasy RPG from HoYoverse</p>
     </div>
   </section>
 
-  <!-- Section 2: Game Intro -->
-  <section class="intro fade-in">
+  <!-- Section 2: Intro -->
+  <section class="intro">
     <div class="intro-container">
       <div class="intro-text">
         <h2>Discover the Universe</h2>
@@ -34,24 +32,22 @@
     </div>
   </section>
 
-  <!-- Script for fade-in animation -->
+  <!-- Script for fade effect -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const fadeElements = document.querySelectorAll(".fade-in");
+      const intro = document.querySelector(".intro");
 
-      const observer = new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("visible");
-              observer.unobserve(entry.target); // fade only once
-            }
-          });
-        },
-        { threshold: 0.2 } // trigger when 20% of section is visible
-      );
+      window.addEventListener("scroll", () => {
+        const introTop = intro.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
 
-      fadeElements.forEach(el => observer.observe(el));
+        // Fade in intro when scrolled into view
+        if (introTop < windowHeight * 0.8) {
+          intro.classList.add("visible");
+        } else {
+          intro.classList.remove("visible");
+        }
+      });
     });
   </script>
 </body>
