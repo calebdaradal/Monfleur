@@ -36,27 +36,30 @@ body {
   height: auto;
 }
 
-/* Menu buttons in top-right */
+/* Menu buttons on right side */
 .menu-buttons {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 30%;         /* adjust vertically so they sit above the apple */
+  right: 40px;      /* keep away from edge */
   display: flex;
-  gap: 15px;
+  flex-direction: column; /* stack vertically */
+  gap: 20px;        /* space between buttons */
 }
 
 .menu-buttons .btn {
-  width: 40px;
-  height: 40px;
+  width: 70px;   /* bigger than logo */
+  height: 70px;
   background: url("assets/menubutton2.png") no-repeat center;
   background-size: contain;
   display: block;
-  transition: filter 0.3s ease;
+  transition: filter 0.3s ease, transform 0.2s ease;
 }
 
 .menu-buttons .btn:hover {
   filter: brightness(0.7);
+  transform: scale(1.05); /* nice hover grow effect */
 }
+
 
 /* Hero Content (Title + Text) */
 .hero-content {
