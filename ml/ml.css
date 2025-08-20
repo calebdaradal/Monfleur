@@ -20,13 +20,10 @@ input#search {
 
 .masterlist-container {
   position: relative;
-  display: flex;
-  align-items: center;
 }
 
 .grid-wrapper {
   overflow: hidden;
-  flex: 1;
 }
 
 #character-grid {
@@ -46,20 +43,30 @@ input#search {
   padding: 0.5rem;
 }
 
+/* 🔽 Floating Arrows */
 .arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
   background: rgba(0,0,0,0.6);
   color: #fff;
   border: none;
   font-size: 2rem;
-  padding: 0.5rem;
+  padding: 0.5rem 0.8rem;
   cursor: pointer;
-  z-index: 5;
+  z-index: 1000;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.arrow:hover {
+  background: rgba(0,0,0,0.8);
 }
 
 .arrow.left {
-  margin-right: 0.5rem;
+  left: 10px;
 }
 
 .arrow.right {
-  margin-left: 0.5rem;
+  right: 10px;
 }
