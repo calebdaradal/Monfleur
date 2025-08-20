@@ -72,8 +72,3 @@ body {
   max-width: 100%;
   border-radius: 8px;
 }
-
-/* Spacer for extra scroll */
-.spacer {
-  height: 100vh;
-}
