@@ -8,90 +8,96 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
-  color: #333;
 }
 
 /* Hero Section */
 .hero {
-  height: 100vh;
-  background: url("assets/fleurwip.png") center/cover no-repeat;
   position: relative;
+  height: 100vh;
+  background: url("assets/fleurwip.png") no-repeat center center/cover;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end; /* push hero-content down */
-  padding: 20px;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 50px;
   text-align: center;
   color: white;
+  overflow: hidden;
 }
 
-/* Logo in top-left */
+/* Logo in top left */
 .logo {
   position: absolute;
   top: 20px;
   left: 20px;
-}
-
-.logo img {
-  width: 100px;
+  width: 120px;
   height: auto;
 }
 
-/* Menu buttons on right side */
+/* Hero content */
+.hero-content {
+  position: absolute;
+  bottom: 30px;
+  text-align: center;
+}
+
+.title-image {
+  width: 300px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.subtitle {
+  margin-top: 15px;
+  font-size: 18px;
+}
+
+/* Menu buttons on face/apple area */
 .menu-buttons {
   position: absolute;
-  top: 35%;          /* adjust to sit above the apple */
-  right: 60px;       /* keep away from edge */
+  top: 35%;   /* adjust this value to move vertically */
+  right: 12%; /* adjust this value to move horizontally */
   display: flex;
-  flex-direction: column; /* stack vertically */
-  gap: 15px;         /* space between buttons */
+  flex-direction: column;
+  gap: 25px;
 }
 
 .menu-buttons .btn {
-  width: 60px;   /* smaller than before */
-  height: 60px;
+  width: 90px;
+  height: 90px;
   background: url("assets/menubutton2.png") no-repeat center;
-  background-size: cover; /* keeps the shape of your button image */
-  display: block;
+  background-size: contain;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
   transition: filter 0.3s ease, transform 0.2s ease;
 }
 
 .menu-buttons .btn:hover {
   filter: brightness(0.7);
-  transform: scale(1.05); /* small hover grow */
+  transform: scale(1.05);
 }
 
-
-
-/* Hero Content (Title + Text) */
-.hero-content {
-  margin-bottom: 50px; /* move text away from middle */
+/* Main Section */
+.main-section {
+  background-color: #d2b48c;
+  padding: 80px 20px;
+  text-align: center;
 }
 
-.title-image {
-  max-width: 250px; /* make title smaller */
-  height: auto;
-  display: block;
-  margin: 0 auto 15px;
-}
-
-.hero-content p {
-  font-size: 1rem;
-}
-
-/* Intro Section */
-.intro-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.content-box {
+  background: #e0cba8;
   padding: 40px;
+  border: 4px solid #8b5e3c;
+  display: inline-block;
+  max-width: 700px;
 }
 
-.intro-text {
-  flex: 1;
-  padding-right: 20px;
+.content-box h2 {
+  margin-bottom: 20px;
+  font-size: 28px;
 }
 
-.intro-media img {
-  max-width: 100%;
-  height: auto;
+.content-box p {
+  font-size: 18px;
 }
