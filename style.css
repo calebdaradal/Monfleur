@@ -47,6 +47,7 @@ body {
   gap: 2rem;
   align-items: center;
   justify-content: center;
+  max-width: 1200px;
 }
 
 .intro-text {
