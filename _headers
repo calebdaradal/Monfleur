@@ -1,0 +1,2 @@
+/admin/*
+  Content-Security-Policy: script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'
