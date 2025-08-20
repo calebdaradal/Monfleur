@@ -66,7 +66,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 40px;
-  background: rgba(0, 0, 0, 0.6); /* dark overlay for text readability */
+  background: rgba(0, 0, 0, 0.6); /* overlay to improve text readability */
   padding: 40px;
   border-radius: 10px;
 }
@@ -97,3 +97,5 @@ body {
   max-width: 100%;
   border-radius: 8px;
 }
+
+
