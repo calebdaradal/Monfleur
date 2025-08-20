@@ -6,6 +6,7 @@ body {
   color: #fff;
 }
 
+/* Panels */
 .panel {
   min-height: 100vh;
   display: flex;
@@ -17,21 +18,19 @@ body {
 
 /* Hero Section */
 .hero {
-  background: url("https://placehold.co/1200x800?text=Hero+Background") center/cover no-repeat;
+  background: url("assets/fleurwip.png") center/cover no-repeat;
   text-align: center;
   flex-direction: column;
 }
 
-/* Logo pinned in top-left corner, full size */
 .hero .logo {
   position: absolute;
   top: 1.5rem;
   left: 2rem;
-  width: 300px;  /* keeps the placeholder size */
+  width: 300px;
   height: auto;
 }
 
-/* Centered text content */
 .hero-content {
   display: flex;
   flex-direction: column;
