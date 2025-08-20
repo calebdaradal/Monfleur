@@ -3,7 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <title>Masterlist</title>
-  <link rel="stylesheet" href="ml.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(180deg, #0b0c1a 0%, #050510 100%);
+      margin: 0;
+      padding: 0;
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .header {
+      padding: 2rem 1rem 1rem;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #e0e0ff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.4);
+    }
+    #search {
+      display: block;
+      margin: 1rem auto 2rem auto;
+      width: 300px;
+      padding: 0.6rem 1rem;
+      border-radius: 30px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+      text-align: center;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2) inset;
+    }
+    .masterlist-container {
+      position: relative;
+      margin: 0 auto;
+      max-width: 1200px;
+    }
+    .grid-wrapper {
+      overflow: hidden;
+    }
+    #character-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr); /* 5 across */
+      grid-template-rows: repeat(3, auto);   /* 3 rows visible */
+      gap: 1.5rem;
+      justify-items: center;
+      transition: transform 0.5s ease;
+    }
+    .character-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      text-align: center;
+      padding: 1rem;
+      width: 180px;
+      height: 400px; /* tall like banners */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .character-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    }
+    .character-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+    .character-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: normal;
+      color: #fff;
+    }
+    .arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: none;
+      font-size: 2rem;
+      padding: 0.5rem 0.8rem;
+      cursor: pointer;
+      z-index: 1000;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+    .arrow:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .arrow.left { left: 20px; }
+    .arrow.right { right: 20px; }
+  </style>
 </head>
 <body>
   <div class="header">
@@ -14,33 +116,33 @@
   <div class="masterlist-container">
     <div class="grid-wrapper">
       <div id="character-grid">
-        <!-- 🔽 Demo cards -->
+        <!-- Hard-coded demo cards -->
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Astra" alt="Astra">
+          <img src="https://via.placeholder.com/180x300/1a1a2e/ffffff?text=Astra" alt="Astra">
           <h3>Astra</h3>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Nyx" alt="Nyx">
+          <img src="https://via.placeholder.com/180x300/1a1a2e/ffffff?text=Nyx" alt="Nyx">
           <h3>Nyx</h3>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Orion" alt="Orion">
+          <img src="https://via.placeholder.com/180x300/1a1a2e/ffffff?text=Orion" alt="Orion">
           <h3>Orion</h3>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Lyra" alt="Lyra">
+          <img src="https://via.placeholder.com/180x300/1a1a2e/ffffff?text=Lyra" alt="Lyra">
           <h3>Lyra</h3>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Draco" alt="Draco">
+          <img src="https://via.placeholder.com/180x300/1a1a2e/ffffff?text=Draco" alt="Draco">
           <h3>Draco</h3>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Vega" alt="Vega">
+          <img src="https://via.placeholder.com/180x300/1a1a2e/ffffff?text=Vega" alt="Vega">
           <h3>Vega</h3>
         </div>
         <div class="character-card">
-          <img src="https://via.placeholder.com/180x250/1a1a2e/ffffff?text=Sirius" alt="Sirius">
+          <img src="https://via.placeholder.com/180x300/1a1a2e/ffffff?text=Sirius" alt="Sirius">
           <h3>Sirius</h3>
         </div>
       </div>
@@ -52,7 +154,6 @@
   <button class="arrow right" id="arrow-right">→</button>
 
   <script>
-    // Simple slideshow logic
     let currentSlide = 0;
     const itemsPerSlide = 5;
     const grid = document.getElementById("character-grid");
