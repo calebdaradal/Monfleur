@@ -22,10 +22,30 @@ body, html {
   height: auto;
 }
 
+/* Top-right menu buttons */
+.menu-buttons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 15px; /* space between buttons */
+}
+
+.menu-buttons img {
+  width: 40px; /* size of buttons */
+  height: auto;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+}
+
+.menu-buttons img:hover {
+  filter: brightness(70%); /* darken on hover */
+}
+
 /* Hero content at bottom */
 .hero-content {
   position: absolute;
-  bottom: 50px;  /* pushes down */
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -34,7 +54,7 @@ body, html {
 /* Title image (scaled smaller) */
 .hero-title {
   display: block;
-  width: 300px;     /* desktop size */
+  width: 300px; /* desktop fixed size */
   height: auto;
   margin: 0 auto 0.5rem auto;
 }
@@ -48,11 +68,19 @@ body, html {
 /* Mobile scaling */
 @media (max-width: 768px) {
   .hero-title {
-    width: 200px;   /* smaller on mobile */
+    width: 200px; /* smaller on mobile */
   }
 
   .hero-content p {
     font-size: 1rem;
+  }
+
+  .logo {
+    width: 90px;
+  }
+
+  .menu-buttons img {
+    width: 30px; /* smaller buttons on mobile */
   }
 }
 
