@@ -1,40 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Honkai: Star Rail Clone</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <!-- Section 1: Hero -->
-  <section class="hero">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <img src="assets/logo.png" alt="Honkai: Star Rail Logo" class="hero-logo" />
-      <h1 class="hero-title">Embark on a New Adventure</h1>
-      <p class="hero-subtitle">A space fantasy RPG from HoYoverse</p>
-    </div>
-  </section>
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  <!-- Section 2: Game Intro -->
-  <section class="intro">
-    <div class="intro-container">
-      <div class="intro-text">
-        <h2>Discover the Universe</h2>
-        <p>
-          Board the Astral Express and explore the infinite wonders of the galaxy.
-          Meet new companions, face thrilling adventures, and uncover hidden secrets.
-        </p>
-      </div>
-      <div class="intro-media">
-        <img src="assets/intro-image.jpg" alt="Game Artwork" />
-        <!-- If you want video instead:
-        <video autoplay muted loop>
-          <source src="assets/trailer.mp4" type="video/mp4" />
-        </video> -->
-      </div>
-    </div>
-  </section>
-</body>
-</html>
+body {
+  font-family: "Arial", sans-serif;
+  color: #fff;
+  background-color: #000;
+  overflow-x: hidden;
+}
+
+/* Section 1: Hero */
+.hero {
+  position: relative;
+  height: 100vh;
+  background: url("https://via.placeholder.com/1600x900?text=Hero+Background") no-repeat center center/cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-logo {
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  color: #ccc;
+}
+
+/* Section 2: Intro */
+.intro {
+  background: #111;
+  padding: 80px 20px;
+}
+
+.intro-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px;
+}
+
+.intro-text {
+  flex: 1 1 400px;
+}
+
+.intro-text h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.intro-text p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #ccc;
+}
+
+.intro-media {
+  flex: 1 1 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.intro-media img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
