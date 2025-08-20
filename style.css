@@ -1,9 +1,26 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+
 /* Hero Section */
 .hero {
   background: url("assets/fleurwip.png") center/cover no-repeat;
-  text-align: center;
-  flex-direction: column;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* push content to bottom */
+  align-items: center;       /* center text horizontally */
+  height: 100vh;             /* full screen height */
 }
 
 .hero .logo {
@@ -15,9 +32,7 @@
 }
 
 .hero-content {
-  position: absolute;
-  bottom: 5%;   /* stick near the bottom */
-  width: 100%;  /* take full width */
+  margin-bottom: 3rem; /* space from bottom edge */
   text-align: center;
 }
 
@@ -31,39 +46,50 @@
   opacity: 0.9;
 }
 
-/* ✅ Responsive adjustments */
-@media (max-width: 1024px) {
-  .hero h1 {
-    font-size: 1.75rem;
-  }
-  .hero p {
-    font-size: 0.95rem;
-  }
-  .hero .logo {
-    width: 220px;
-  }
+/* Intro Section */
+.intro {
+  background: #111;
+  padding: 5rem 2rem;
 }
 
+.intro-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.intro-text {
+  flex: 1;
+}
+
+.intro-media {
+  flex: 1;
+}
+
+.intro img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
   .hero h1 {
     font-size: 1.5rem;
   }
+
   .hero p {
     font-size: 0.9rem;
   }
-  .hero .logo {
-    width: 180px;
-  }
-}
 
-@media (max-width: 480px) {
-  .hero h1 {
-    font-size: 1.25rem;
-  }
-  .hero p {
-    font-size: 0.8rem;
-  }
   .hero .logo {
-    width: 150px;
+    width: 200px;
+  }
+
+  .intro-container {
+    flex-direction: column;
+    text-align: center;
   }
 }
