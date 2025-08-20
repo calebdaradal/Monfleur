@@ -33,7 +33,7 @@ body {
 
 .hero-content {
   position: absolute;
-  bottom: 40px; /* closer to bottom */
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -41,10 +41,10 @@ body {
 }
 
 .hero-title {
-  max-width: 300px; /* smaller size */
+  max-width: 180px;  /* much smaller */
   width: 100%;
   height: auto;
-  margin-bottom: 0.5rem; /* a little spacing above the tagline */
+  margin-bottom: 0.5rem;
 }
 
 .hero p {
