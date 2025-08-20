@@ -1,70 +1,73 @@
-/* Reset and base styles */
-* {
+/* General styles */
+body, html {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-body {
   font-family: Arial, sans-serif;
-  color: white;
-  margin: 0;
-  padding: 0;
 }
 
 /* Hero Section */
 .hero {
-  background: url("assets/fleurwip.png") center/cover no-repeat;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end; /* push content to bottom */
-  align-items: center;       /* center text horizontally */
-  height: 100vh;             /* full screen height */
-}
-
-.hero .logo {
-  position: absolute;
-  top: 1.5rem;
-  left: 2rem;
-  width: 300px;
-  height: auto;
-}
-
-.hero-content {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
+  height: 100vh;
+  background: url("assets/fleurwip.png") center/cover no-repeat;
   color: white;
 }
 
-.hero-title {
-  max-width: 180px;  /* much smaller */
-  width: 100%;
+/* Top-left logo */
+.logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 120px;
   height: auto;
-  margin-bottom: 0.5rem;
 }
 
-.hero p {
-  font-size: 1rem;
-  opacity: 0.9;
+/* Hero content at bottom */
+.hero-content {
+  position: absolute;
+  bottom: 50px;  /* pushes down */
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+/* Title image (scaled smaller) */
+.hero-title {
+  display: block;
+  width: 300px;     /* desktop size */
+  height: auto;
+  margin: 0 auto 0.5rem auto;
+}
+
+/* Subtext */
+.hero-content p {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* Mobile scaling */
+@media (max-width: 768px) {
+  .hero-title {
+    width: 200px;   /* smaller on mobile */
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
 }
 
 /* Intro Section */
 .intro {
-  background: #111;
-  padding: 5rem 2rem;
+  padding: 50px;
+  background: #f5f5f5;
+  color: #333;
 }
 
 .intro-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .intro-text {
@@ -75,27 +78,8 @@ body {
   flex: 1;
 }
 
-.intro img {
+.intro-media img {
   width: 100%;
+  height: auto;
   border-radius: 8px;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .hero-title {
-    max-width: 350px; /* shrink title image on mobile */
-  }
-
-  .hero p {
-    font-size: 0.9rem;
-  }
-
-  .hero .logo {
-    width: 200px;
-  }
-
-  .intro-container {
-    flex-direction: column;
-    text-align: center;
-  }
 }
