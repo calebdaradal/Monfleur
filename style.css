@@ -32,8 +32,8 @@ body {
 }
 
 .hero-content {
-  margin-bottom: 3rem; /* space from bottom edge */
   text-align: center;
+  margin-bottom: 3rem; /* space from bottom */
 }
 
 .hero h1 {
