@@ -1,81 +1,78 @@
-/* Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* General Reset */
 body {
+  margin: 0;
   font-family: Arial, sans-serif;
-  color: white;
-  overflow-x: hidden;
-  height: 200vh; /* Enough height for scroll */
+  background: #111;
+  color: #fff;
 }
 
-/* Panels stacked on top of each other */
+/* Panels */
 .panel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  transition: opacity 0.3s linear;
+  padding: 2rem;
 }
 
-/* Hero */
+/* Hero Section */
 .hero {
-  background: url('https://wallpapers.com/images/featured/black-faded-background-l3dfoa4ffnp5flyr.jpg') 
-              no-repeat center center/cover;
-  z-index: 1;
+  background: url("https://placehold.co/1200x800?text=Hero+Background") center/cover no-repeat;
+  text-align: center;
 }
 
-.hero-content {
-  max-width: 800px;
-  padding: 20px;
+.hero .logo {
+  display: block;
+  margin: 0 auto 1rem;
 }
 
 .hero h1 {
   font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 10px;
+  margin: 1rem 0;
 }
 
 .hero p {
-  font-size: 1.5rem;
-  color: #ccc;
+  font-size: 1.25rem;
+  opacity: 0.9;
 }
 
-/* Intro */
+/* Intro Section */
 .intro {
-  background: url('https://static.vecteezy.com/system/resources/previews/006/418/595/non_2x/halftone-tonal-fade-abstract-background-half-tone-pattern-with-smooth-black-and-white-transitions-vector.jpg') 
-              no-repeat center center/cover;
-  z-index: 2;
-  opacity: 0;
+  background: #222;
 }
 
 .intro-container {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 2rem;
   align-items: center;
   justify-content: center;
-  max-width: 1000px;
-  margin: auto;
-  padding: 20px;
-  color: black;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 10px;
+}
+
+.intro-text {
+  flex: 1 1 300px;
+}
+
+.intro-text h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.intro-text p {
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.intro-media {
+  flex: 1 1 300px;
 }
 
 .intro-media img {
   max-width: 100%;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
-/* Spacer to allow scroll */
+/* Spacer for extra scroll */
 .spacer {
-  height: 200vh;
+  height: 100vh;
 }
