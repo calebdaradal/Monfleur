@@ -4,34 +4,9 @@
   <meta charset="UTF-8" />
   <title>Content Manager</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Allow CMS script -->
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline';">
-
 </head>
 <body>
   <!-- Netlify/Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  
-  <script>
-    // Auth0 backend support for CMS
-    CMS.init({
-      config: {
-        backend: {
-          name: "auth0",
-          auth0_domain: "dev-wwis53dariqwn1jf.us.auth0.com",
-          auth0_client_id: "HBms7Z6ja78KRmzbsUdR2A7yrnz9Zm2c",
-          repo: "Seucwi-18/Monfleur",
-          branch: "main"
-        }
-      }
-    });
-  </script>
 </body>
 </html>
-
-
-
-
-
-
