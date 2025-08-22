@@ -13,32 +13,61 @@
       <a href="#">Dashboard</a>
       <a href="#">Upload Character</a>
       <a href="#">Character Database</a>
+      <a href="#">Settings</a>
     </nav>
   </div>
 
   <!-- Main Content -->
   <div class="content">
-    <h3>Upload Character</h3>
-    <form id="uploadForm">
-      <label>ML Number <input type="text" name="mlNumber" required></label>
-      <label>Owner <input type="text" name="owner" required></label>
-      <label>Artist <input type="text" name="artist"></label>
-      <label>Biome <input type="text" name="biome"></label>
-      <label>Rarity <input type="text" name="rarity"></label>
-      <label>Traits <input type="text" name="traits"></label>
-      <label>Status <input type="text" name="status"></label>
-      <label>Value <input type="text" name="value"></label>
-      <label>Notes <textarea name="notes"></textarea></label>
-      <label>Transaction Log <textarea name="transaction"></textarea></label>
-      <label>Preview Image URL <input type="url" name="previewImage"></label>
-      <label>Main Image URL <input type="url" name="mainImage"></label>
-      <button type="submit">Save</button>
+    <h1>Upload Character</h1>
+
+    <form id="uploadForm" class="form-box">
+      <div class="form-grid">
+        <label>ML Number
+          <input type="text" name="mlNumber" required>
+        </label>
+        <label>Owner
+          <input type="text" name="owner" required>
+        </label>
+        <label>Artist
+          <input type="text" name="artist">
+        </label>
+        <label>Biome
+          <input type="text" name="biome">
+        </label>
+        <label>Rarity
+          <input type="text" name="rarity">
+        </label>
+        <label>Traits
+          <input type="text" name="traits">
+        </label>
+        <label>Status
+          <input type="text" name="status">
+        </label>
+        <label>Value
+          <input type="text" name="value">
+        </label>
+        <label>Notes
+          <textarea name="notes"></textarea>
+        </label>
+        <label>Transaction Log
+          <textarea name="transaction"></textarea>
+        </label>
+        <label>Preview Image URL
+          <input type="url" name="previewImage">
+        </label>
+        <label>Main Image URL
+          <input type="url" name="mainImage">
+        </label>
+      </div>
+
+      <button type="submit">Save Character</button>
     </form>
 
-    <span id="uploadStatus"></span>
-
-    <h3>Character Database</h3>
-    <div id="cards"></div>
+    <h1>Character Database</h1>
+    <div id="cards" class="card-grid">
+      <!-- Character cards will go here -->
+    </div>
   </div>
 </body>
 </html>
