@@ -1,1 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Character</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main>
+    <img id="mainImg">
+    <h2 id="ml"></h2>
+    <p>Owner: <span id="owner"></span></p>
+    <p>Artist: <span id="artist"></span></p>
+    <p>Rarity: <span id="rarity"></span></p>
+    <p>Biome: <span id="biome"></span></p>
+    <p>Traits: <span id="traits"></span></p>
+    <p>Status: <span id="status"></span></p>
+    <p>Value: <span id="value"></span></p>
+    <p>Notes: <span id="notes"></span></p>
+    <pre id="txlog"></pre>
+  </main>
+
+  <script>
+    const id = new URLSearchParams(location.search).get("id");
+    async function load() {
+      const res = await fetch(`/characters/${id}`);
+      const data = await res.json();
+      document.getElementById("ml").textContent = data.id;
+      document.getElementById("owner").textContent = data.owner;
+      document.getElementById("artist").textContent = data.artist;
+      document.getElementById("rarity").textContent = data.rarity;
+      document.getElementById("biome").textContent = data.biome;
+      document.getElementById("traits").textContent = data.traits?.join(", ");
+      document.getElementById("status").textContent = data.status;
+      document.getElementById("value").textContent = data.value;
+      document.getElementById("notes").textContent = data.notes;
+      document.getElementById("txlog").textContent = data.txLog;
+      document.getElementById("mainImg").src = data.images?.main || data.images?.preview;
+    }
+    load();
+  </script>
+</body>
+</html>
 
