@@ -1,1 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>Masterlist Admin</h2>
+    <nav>
+      <a href="#upload">Upload</a>
+      <a href="#database">Database</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <section id="upload">
+      <h3>Upload Character</h3>
+      <form id="uploadForm">
+        <label>ML Number <input name="mlNumber" required /></label>
+        <label>Owner <input name="owner" /></label>
+        <label>Artist <input name="artist" /></label>
+        <label>Biome <input name="biome" /></label>
+        <label>Rarity <input name="rarity" /></label>
+        <label>Traits <input name="traits" /></label>
+        <label>Status <input name="status" /></label>
+        <label>Value <input name="value" /></label>
+        <label>Notes <textarea name="notes"></textarea></label>
+        <label>Transaction Log <textarea name="txlog"></textarea></label>
+        <label>Main Image URL <input name="mainUrl" /></label>
+        <label>Preview Image URL <input name="previewUrl" /></label>
+        <button type="submit">Save</button>
+      </form>
+      <output id="uploadStatus"></output>
+    </section>
+
+    <section id="database">
+      <h3>Character Database</h3>
+      <div id="cards"></div>
+    </section>
+  </main>
+
+  <script src="./admin.js"></script>
+</body>
+</html>
 
