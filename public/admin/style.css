@@ -1,25 +1,125 @@
-/* === Reset === */
+/* Reset */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
+
+/* Layout */
 body {
+  font-family: Arial, sans-serif;
   display: flex;
-  min-height: 100vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: #1e1e2f;
-  color: #f1f1f1;
+  height: 100vh;
+  background: #f9fafb;
+  color: #111;
 }
 
-/* === Sidebar === */
+/* Sidebar */
 .sidebar {
-  width: 220px;
-  background: #27293d;
-  padding: 1.5rem;
+  width: 240px;
+  background: #111827;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
-.sidebar h2 {
-  margin-bottom: 1.5rem;
-  font-size: 1.2rem;
-  col
 
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 10px;
+  margin: 5px 0;
+  text-decoration: none;
+  color: #9CA3AF;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.sidebar nav a:hover {
+  background: #1f2937;
+  color: white;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+h1 {
+  margin-bottom: 15px;
+}
+
+/* Form */
+.form-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  margin-bottom: 40px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: #374151;
+}
+
+input, textarea {
+  margin-top: 6px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+button {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+/* Character cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  padding: 15px;
+  text-align: center;
+}
+
+.card img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
