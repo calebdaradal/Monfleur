@@ -1,1 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Masterlist</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <h1>Masterlist</h1>
+  <input id="search" placeholder="Search...">
+  <div id="grid"></div>
+
+  <script>
+    async function load() {
+      const res = await fetch("/characters");
+      const data = await res.json();
+      render(data.items || []);
+    }
+    function render(items) {
+      const q = document.getElementById("search").value.toLowerCase();
+      document.getElementById("grid").innerHTML = items
+        .filter(c => !q || c.id.toLowerCase().includes(q) || c.owner.toLowerCase().includes(q))
+        .map(c => `
+          <a href="/character/?id=${encodeURIComponent(c.id)}" class="card">
+            <img src="${c.preview || ""}">
+            <div>${c.id}<br><small>${c.owner}</small></div>
+          </a>
+        `).join("");
+    }
+    document.getElementById("search").addEventListener("input", load);
+    load();
+  </script>
+</body>
+</html>
 
