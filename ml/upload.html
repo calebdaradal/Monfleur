@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Character - Character Management Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">CML</div>
+                    <span class="logo-text">Character Manager</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i>Dashboard</a></li>
+                <li><a href="upload.html" class="nav-link active"><i class="fas fa-upload"></i>Upload Character</a></li>
+                <li><a href="database.html" class="nav-link"><i class="fas fa-database"></i>Character Database</a></li>
+                <li><a href="user-management.html" class="nav-link"><i class="fas fa-users-cog"></i>User Management</a></li>
+                <li><a href="profile-settings.html" class="nav-link"><i class="fas fa-user-cog"></i>Profile Settings</a></li>
+                <li><a href="logging.html" class="nav-link"><i class="fas fa-file-text"></i>Logging</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <!-- Header content will be populated by DashboardHeader component -->
+            </header>
+
+            <div class="content-area">
+                <!-- Tabs -->
+                <div class="tabs-container">
+                    <div class="tabs-list">
+                        <button class="tab-trigger active" data-tab="upload">Upload New Character</button>
+                        <!-- <button class="tab-trigger" data-tab="edit">Edit Character</button> -->
+                    </div>
+
+                    <!-- Upload Tab -->
+                    <div class="tab-content active" id="upload">
+                        <div class="upload-container">
+                            <div class="upload-form-section">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3><i class="fas fa-upload"></i>Upload New Character</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <form class="character-form">
+                                            <div class="form-grid">
+                                                <div class="form-group">
+                                                    <label for="owner">Owner *</label>
+                                                    <input type="text" id="owner" name="owner" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="artist">Artist *</label>
+                                                    <input type="text" id="artist" name="artist" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="masterlistNumber">Masterlist Number *</label>
+                                                    <input type="text" id="masterlistNumber" name="masterlistNumber" placeholder="ML-XXX" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="primaryBiome">Primary Biome *</label>
+                                                    <select id="primaryBiome" name="primaryBiome" required>
+                                                        <option value="">Select primary biome</option>
+                                                        <option value="Forest/Jungle">Forest/Jungle</option>
+                                                        <option value="Beach/Ocean">Beach/Ocean</option>
+                                                        <option value="Mountain">Mountain</option>
+                                                        <option value="Desert">Desert</option>
+                                                        <option value="Plains">Plains</option>
+                                                        <option value="Tundra">Tundra</option>
+                                                        <option value="Sky/Canopy">Sky/Canopy</option>
+                                                        <option value="Celestial/Galaxy">Celestial/Galaxy</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="secondaryBiome">Secondary Biome</label>
+                                                    <select id="secondaryBiome" name="secondaryBiome">
+                                                        <option value="none">None</option>
+                                                        <option value="Forest/Jungle">Forest/Jungle</option>
+                                                        <option value="Beach/Ocean">Beach/Ocean</option>
+                                                        <option value="Mountain">Mountain</option>
+                                                        <option value="Desert">Desert</option>
+                                                        <option value="Plains">Plains</option>
+                                                        <option value="Tundra">Tundra</option>
+                                                        <option value="Sky/Canopy">Sky/Canopy</option>
+                                                        <option value="Celestial/Galaxy">Celestial/Galaxy</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="rarity">Rarity *</label>
+                                                    <select id="rarity" name="rarity" required>
+                                                        <option value="">Select rarity</option>
+                                                        <option value="Common">Common</option>
+                                                        <option value="Uncommon">Uncommon</option>
+                                                        <option value="Rare">Rare</option>
+                                                        <option value="Ultra Rare">Ultra Rare</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="traits">Traits</label>
+                                                <textarea id="traits" name="traits" rows="3" placeholder="Describe character traits..."></textarea>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="notes">Notes</label>
+                                                <textarea id="notes" name="notes" rows="3" placeholder="Additional notes..."></textarea>
+                                            </div>
+                                            
+                                            <div class="form-grid">
+                                                <div class="form-group">
+                                                    <label for="status">Status *</label>
+                                                    <select id="status" name="status" required>
+                                                        <option value="">Select status</option>
+                                                        <option value="trade-gift">Trade/Gift</option>
+                                                        <option value="trade-gift-resell">Trade/Gift/Resell</option>
+                                                        <option value="not-for-trade">Not for Trade</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="value">Value</label>
+                                                    <input type="text" id="value" name="value" placeholder="$0">
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Image URL input field -->
+                                            <div class="form-group">
+                                                <label for="imageUrl">Google Drive Image Link:</label>
+                                                <input type="url" id="imageUrl" name="imageUrl" class="form-control" 
+                                                       placeholder="https://drive.google.com/file/d/...">
+                                                <div id="imageUrlStatus"></div>
+                                            </div>
+                                            
+                                            <!-- REMOVE THIS ENTIRE SECTION -->
+                                            <!-- Image preview container - REMOVE THIS ENTIRE DIV -->
+                                            <!-- <div id="imagePreviewContainer" class="image-preview-container">
+                                                Preview will be shown here
+                                            </div> -->
+                                            
+                                            <!-- <div class="form-group">
+                                                <label for="publicImage">Public Image URL</label>
+                                                <input type="url" id="publicImage" name="publicImage" placeholder="https://...">
+                                            </div> -->
+                                            
+                                            <div class="form-actions">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-save"></i>Upload Character
+                                                </button>
+                                                <!-- <button type="button" class="btn btn-outline" onclick="previewCharacter()">
+                                                    <i class="fas fa-eye"></i>Preview
+                                                </button> -->
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Preview Section -->
+                            <div class="preview-section">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3><i class="fas fa-eye"></i>Preview</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="character-preview" id="characterPreview">
+                                            <div class="preview-placeholder">
+                                                <i class="fas fa-image"></i>
+                                                <p>Fill out the form to see preview</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Tab -->
+                    <!-- <div class="tab-content" id="edit">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-edit"></i>Edit Existing Character</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-group">
+                                    <label for="editSearch">Search by Masterlist Number</label>
+                                    <div class="search-input">
+                                        <input type="text" id="editSearch" placeholder="Enter ML-XXX">
+                                        <button type="button" class="btn btn-primary" onclick="searchCharacter()">
+                                            <i class="fas fa-search"></i>Search
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="editResults" class="edit-results"></div>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add this before your upload.js script -->
+    <script type="module">
+        // Firebase modules will be imported dynamically in the JavaScript files
+    </script>
+    
+    <!-- Header Component -->
+    <script src="components/header.js"></script>
+    <script>
+        // Initialize header component
+        document.addEventListener('DOMContentLoaded', function() {
+            new DashboardHeader({
+                pageTitle: 'Upload Character',
+                userRole: 'Moderator',
+                showSwitchAccount: true
+            });
+        });
+    </script>
+    <!-- Update existing script tags to use modules -->
+    <script type="module" src="upload.js"></script>
+    
+    <!-- Dashboard JavaScript for header user info -->
+    <script src="dashboard.js"></script>
+</body>
+</html>

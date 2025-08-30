@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Character Management Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* User Management Specific Styles */
+        .user-management-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .user-form-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .user-form-card h3 {
+            margin: 0 0 20px 0;
+            color: var(--foreground);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Card Actions Styling */
+        .card-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            flex: 1;
+        }
+
+        /* Refresh Button Styling */
+        #refreshUsersButton {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        #refreshUsersButton:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #refreshUsersButton.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        #refreshUsersButton.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--foreground);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.75rem;
+            color: var(--muted-foreground);
+            font-style: italic;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card);
+            color: var(--foreground);
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(82, 25, 18, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+        }
+
+        /* Toggle Switch Overrides - Higher Specificity */
+        .form-group .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group .toggle-input {
+            display: none;
+        }
+
+        .form-group .toggle-label {
+            position: relative;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            gap: 12px;
+        }
+
+        .form-group .toggle-slider {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background-color: var(--border);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group .toggle-slider::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group .toggle-input:checked + .toggle-label .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        .form-group .toggle-input:checked + .toggle-label .toggle-slider::before {
+            transform: translateX(26px);
+        }
+
+        .form-group .toggle-text {
+            font-size: 0.9rem;
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        .form-group .toggle-input:checked + .toggle-label .toggle-text {
+            color: var(--primary);
+        }
+
+        .form-group .toggle-label:hover .toggle-slider {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(82, 25, 18, 0.1);
+        }
+
+        .form-select {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card);
+            color: var(--foreground);
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .users-table th {
+            background: var(--secondary);
+            color: var(--foreground);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .users-table td {
+            color: var(--foreground);
+        }
+
+        .users-table tr:hover {
+            background: var(--muted);
+        }
+
+        .user-role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-admin {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .role-moderator {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .role-user {
+            background: rgba(34, 197, 94, 0.1);
+            color: #059669;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-active {
+            background: #10b981;
+        }
+
+        .status-inactive {
+            background: #ef4444;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .message-container {
+            margin-bottom: 20px;
+            min-height: 20px;
+        }
+
+        .success-message,
+        .error-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.1);
+            color: #059669;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted-foreground);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Header styling is now handled by the header component */
+
+        @media (max-width: 768px) {
+            .user-management-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .users-table {
+                font-size: 0.9rem;
+            }
+            
+            .users-table th,
+            .users-table td {
+                padding: 12px 8px;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-end;
+            }
+            
+
+        }
+
+        /* Password Generator Styles */
+        .password-generator-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .password-display {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+        }
+
+        .password-display:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(82, 25, 18, 0.1);
+        }
+
+        .password-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-sm {
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-sm:active {
+            transform: translateY(0);
+        }
+
+        .btn-sm i {
+            font-size: 0.9rem;
+        }
+
+        /* Username Generator Styles */
+        .username-generator-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .username-display {
+            flex: 1;
+            background-color: #ffffff;
+            border: 2px solid #e9ecef;
+        }
+
+        .username-display:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(82, 25, 18, 0.1);
+        }
+
+        .username-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">CML</div>
+                    <span class="logo-text">Character Manager</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i>Dashboard</a></li>
+                <li><a href="upload.html" class="nav-link"><i class="fas fa-upload"></i>Upload Character</a></li>
+                <li><a href="database.html" class="nav-link"><i class="fas fa-database"></i>Character Database</a></li>
+                <li><a href="user-management.html" class="nav-link active"><i class="fas fa-users-cog"></i>User Management</a></li>
+                <li><a href="profile-settings.html" class="nav-link"><i class="fas fa-user-cog"></i>Profile Settings</a></li>
+                <li><a href="logging.html" class="nav-link"><i class="fas fa-file-text"></i>Logging</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <!-- Header content will be populated by DashboardHeader component -->
+            </header>
+
+            <div class="content-area">
+                <!-- Message Container -->
+                <div id="messageContainer" class="message-container"></div>
+
+                <!-- User Management Container -->
+                <div class="user-management-container">
+                    <!-- Add User Form -->
+                    <div class="user-form-card">
+                        <h3><i class="fas fa-user-plus"></i>Add New User</h3>
+                        <form id="addUserForm">
+                            <div class="form-group">
+                                <label for="userEmail" class="form-label">Email Address *</label>
+                                <input type="email" id="userEmail" class="form-input" placeholder="user@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="userPassword" class="form-label">Password *</label>
+                                <div class="password-generator-container">
+                                    <input type="text" id="userPassword" class="form-input password-display" placeholder="Generated password" readonly required>
+                                    <div class="password-buttons">
+                                        <button type="button" id="regeneratePassword" class="btn btn-secondary btn-sm" title="Generate new password">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                        <button type="button" id="copyPassword" class="btn btn-secondary btn-sm" title="Copy password">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- <small class="form-help">Auto-generated 6-character password. Click regenerate for a new one.</small> -->
+                            </div>
+                            <div class="form-group">
+                                <label for="userUsername" class="form-label">Username *</label>
+                                <div class="username-generator-container">
+                                    <input type="text" id="userUsername" class="form-input username-display" placeholder="Fluffy_jellyfish" required>
+                                    <div class="username-buttons">
+                                        <button type="button" id="regenerateUsername" class="btn btn-secondary btn-sm" title="Generate new username">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                        <button type="button" id="copyUsername" class="btn btn-secondary btn-sm" title="Copy username">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- <small class="form-help">Auto-generated username combining adjective and animal. Only letters, numbers, and special characters allowed (no spaces)</small> -->
+                            </div>
+                            <div class="form-group">
+                                <label for="userDisplayName" class="form-label">Display Name</label>
+                                <input type="text" id="userDisplayName" class="form-input" placeholder="Fluffy jellyfish">
+                                <!-- <small class="form-help">Auto-synced with username (proper case formatting)</small> -->
+                            </div>
+                            <div class="form-group">
+                                <label for="userRole" class="form-label">Role *</label>
+                                <select id="userRole" class="form-select" required>
+                                    <option value="">Select Role</option>
+                                    <option value="moderator">Moderator</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="userActive" class="form-label">Active Status</label>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="userActive" class="toggle-input" checked>
+                                    <label for="userActive" class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                        <span class="toggle-text">Active</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="addUserButton">
+                                <i class="fas fa-user-plus"></i>
+                                Add User
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="saveChangesButton" style="display: none;">
+                                <i class="fas fa-save"></i>
+                                Save Changes
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancelEditButton" style="display: none;">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- User Statistics -->
+                    <div class="user-form-card">
+                        <h3><i class="fas fa-chart-bar"></i>User Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalUsers">0</div>
+                                <div class="stat-label">Total Users</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="activeUsers">0</div>
+                                <div class="stat-label">Active Users</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="adminUsers">0</div>
+                                <div class="stat-label">Administrators</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="moderatorUsers">0</div>
+                                <div class="stat-label">Moderators</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-users"></i>Manage Users</h3>
+                        <div class="card-actions">
+                            <button class="btn btn-outline" id="refreshUsersButton">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div id="usersTableContainer">
+                            <table class="users-table" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Active</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <!-- Users will be populated here -->
+                                </tbody>
+                            </table>
+                            <div id="emptyState" class="empty-state" style="display: none;">
+                                <i class="fas fa-users"></i>
+                                <h3>No Users Found</h3>
+                                <p>Start by adding your first user above.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i>Confirm Deletion</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+                <div class="user-info">
+                    <strong>User:</strong> <span id="deleteUserEmail"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDelete">Cancel</button>
+                <button class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash"></i>
+                    Delete User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout modal is now handled by the header component -->
+
+    <!-- Header Component -->
+    <script src="components/header.js"></script>
+    <script>
+        // Initialize header component
+        document.addEventListener('DOMContentLoaded', function() {
+            new DashboardHeader({
+                pageTitle: 'User Management',
+                userRole: 'Admin',
+                showSwitchAccount: true
+            });
+        });
+    </script>
+    <script type="module" src="user-management.js"></script>
+    
+    <!-- Dashboard JavaScript for header user info -->
+    <script src="dashboard.js"></script>
+</body>
+</html>

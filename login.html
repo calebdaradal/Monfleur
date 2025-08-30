@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Character Management System</title>
+    <link rel="stylesheet" href="ml/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Login-specific styles */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--background) 0%, var(--secondary) 100%);
+            padding: 2rem;
+        }
+        
+        .login-card {
+            background: var(--card);
+            border-radius: calc(var(--radius) * 2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-logo {
+            width: 4rem;
+            height: 4rem;
+            background-color: var(--primary);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-foreground);
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+        
+        .login-title {
+            color: var(--foreground);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-subtitle {
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-label {
+            color: var(--foreground);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .form-input {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            background-color: var(--card);
+            color: var(--foreground);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(82, 25, 18, 0.1);
+        }
+        
+        .login-button {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            padding: 0.875rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .login-button:hover {
+            background-color: hsl(82, 25%, 15%);
+            transform: translateY(-1px);
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            background-color: hsl(0, 84%, 95%);
+            color: hsl(0, 84%, 40%);
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            border: 1px solid hsl(0, 84%, 85%);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .success-message {
+            background-color: hsl(120, 84%, 95%);
+            color: hsl(120, 84%, 40%);
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            border: 1px solid hsl(120, 84%, 85%);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .forgot-password a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading-spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">CML</div>
+                <h1 class="login-title">Welcome Back</h1>
+                <p class="login-subtitle">Sign in to your Character Management account</p>
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div id="messageContainer"></div>
+                
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="Enter your email"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                
+                <button type="submit" class="login-button" id="loginButton">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="forgot-password">
+                <a href="#" id="forgotPasswordLink">Forgot your password?</a>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="login.js"></script>
+</body>
+</html>

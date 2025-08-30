@@ -1,0 +1,76 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - only admins can manage users
+    match /users/{userId} {
+      // Allow read access to authenticated users for their own data
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow admins to read all user data
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super-admin'];
+      
+      // Allow admins to create, update, and delete users
+      allow create, update, delete: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super-admin'];
+      
+      // Allow users to update their own profile (excluding role changes)
+      allow update: if request.auth != null && 
+        request.auth.uid == userId &&
+        !('role' in request.resource.data.diff(resource.data).affectedKeys());
+    }
+    
+    // Characters collection - existing rules
+    match /characters/{characterId} {
+      // Allow read access to all authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow write access to authenticated users with appropriate roles
+      allow create, update: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'moderator', 'super-admin'];
+      
+      // Allow delete access only to admins
+      allow delete: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super-admin'];
+    }
+    
+    // Activity logs collection - read-only for admins and moderators
+    match /activity_logs/{logId} {
+      // Allow read access to admins and moderators
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'moderator', 'super-admin'];
+      
+      // Allow create access for system logging (server-side only)
+      allow create: if request.auth != null;
+      
+      // Prevent updates and deletes to maintain log integrity
+      allow update, delete: if false;
+    }
+    
+    // System settings collection - admin only
+    match /system_settings/{settingId} {
+      allow read, write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super-admin';
+    }
+    
+    // Default deny rule for all other documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Additional security considerations:
+// 1. Implement rate limiting on the client side
+// 2. Use Firebase App Check for additional security
+// 3. Implement proper input validation
+// 4. Use HTTPS only
+// 5. Regularly audit user permissions
+// 6. Implement proper error handling to avoid information leakage

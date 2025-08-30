@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings - Character Management Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Profile Settings Specific Styles */
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .profile-card h3 {
+            margin: 0 0 20px 0;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: var(--input-background);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(82, 82, 82, 0.1);
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: 8px;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--secondary-background);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-sm:hover {
+            background: var(--hover-background);
+            border-color: var(--primary-color);
+        }
+
+        .btn-sm:active {
+            transform: translateY(1px);
+        }
+
+        .btn-sm i {
+            font-size: 0.7rem;
+        }
+
+        .feedback {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .feedback.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .feedback.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .feedback.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .current-info {
+            background: var(--muted-background);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .current-info strong {
+            color: var(--text-primary);
+        }
+
+        .password-requirements {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .save-button {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .message-container {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .alert.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .alert.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">MF</div>
+                    <span class="logo-text">MonFleur</span>
+                </div>
+            </div>
+            <nav>
+                <ul class="sidebar-nav">
+                    <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i>Dashboard</a></li>
+                    <li><a href="upload.html" class="nav-link"><i class="fas fa-upload"></i>Upload Character</a></li>
+                    <li><a href="database.html" class="nav-link"><i class="fas fa-database"></i>Character Database</a></li>
+                    <li><a href="user-management.html" class="nav-link"><i class="fas fa-users-cog"></i>User Management</a></li>
+                    <li><a href="profile-settings.html" class="nav-link active"><i class="fas fa-user-cog"></i>Profile Settings</a></li>
+                    <li><a href="logging.html" class="nav-link"><i class="fas fa-file-text"></i>Logging</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <!-- Footer content can be added here if needed -->
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <!-- Header content will be populated by DashboardHeader component -->
+            </header>
+            
+            <div class="content-area">
+                <div class="content-header">
+                    <!-- <h2>Profile Settings</h2>
+                    <p>Manage your profile information and account settings</p> -->
+                </div>
+
+                <div class="profile-container">
+                <!-- Message Container -->
+                <div class="message-container">
+                    <div id="alertMessage" class="alert"></div>
+                </div>
+
+                <!-- Current Profile Info -->
+                <div class="profile-card">
+                    <h3><i class="fas fa-info-circle"></i>Current Profile Information</h3>
+                    <div class="current-info">
+                        <p><strong>Email:</strong> <span id="currentEmail">Loading...</span></p>
+                        <p><strong>Display Name:</strong> <span id="currentDisplayName">Loading...</span></p>
+                        <p><strong>Username:</strong> <span id="currentUsername">Loading...</span></p>
+                        <p><strong>Role:</strong> <span id="currentRole">Loading...</span></p>
+                    </div>
+                </div>
+
+                <!-- Profile Settings Form -->
+                <form id="profileSettingsForm">
+                    <!-- Display Name Section -->
+                    <div class="profile-card">
+                        <h3><i class="fas fa-user"></i>Display Name</h3>
+                        <div class="form-group">
+                            <label for="displayName" class="form-label">Display Name *</label>
+                            <input type="text" id="displayName" name="displayName" class="form-input" 
+                                   placeholder="Enter your display name" required>
+                            <div id="displayNameFeedback" class="feedback"></div>
+                        </div>
+                    </div>
+
+                    <!-- Username Section -->
+                    <div class="profile-card">
+                        <h3><i class="fas fa-at"></i>Username</h3>
+                        <div class="form-group">
+                            <label for="username" class="form-label">Username *</label>
+                            <div class="input-group">
+                                <input type="text" id="username" name="username" class="form-input" 
+                                       placeholder="Enter your username" required>
+                                <div class="input-buttons">
+                                    <button type="button" id="generateUsername" class="btn-sm" title="Generate new username">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button type="button" id="copyUsername" class="btn-sm" title="Copy username">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="usernameFeedback" class="feedback"></div>
+                        </div>
+                    </div>
+
+                    <!-- Password Section -->
+                    <div class="profile-card">
+                        <h3><i class="fas fa-lock"></i>Change Password</h3>
+                        <div class="form-group">
+                            <label for="currentPassword" class="form-label">Current Password *</label>
+                            <input type="password" id="currentPassword" name="currentPassword" class="form-input" 
+                                   placeholder="Enter your current password" required>
+                            <div id="currentPasswordFeedback" class="feedback"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword" class="form-label">New Password *</label>
+                            <input type="password" id="newPassword" name="newPassword" class="form-input" 
+                                   placeholder="Enter your new password" required>
+                            <div class="password-requirements">
+                                Minimum 6 characters required
+                            </div>
+                            <div id="newPasswordFeedback" class="feedback"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword" class="form-label">Confirm New Password *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" 
+                                   placeholder="Confirm your new password" required>
+                            <div id="confirmPasswordFeedback" class="feedback"></div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <button type="submit" class="btn btn-primary save-button" id="saveProfileButton">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Logout modal is now handled by the header component -->
+        </main>
+    </div>
+
+    <!-- Header Component -->
+    <script src="components/header.js"></script>
+    <script>
+        // Initialize header component
+        document.addEventListener('DOMContentLoaded', function() {
+            new DashboardHeader({
+                pageTitle: 'Profile Settings',
+                userRole: 'Moderator',
+                showSwitchAccount: true
+            });
+        });
+    </script>
+    <script type="module" src="profile-settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "monfleur",
+  "version": "1.0.0",
+  "description": "monfleur website",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Seucwi-18/Monfleur.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Seucwi-18/Monfleur/issues"
+  },
+  "homepage": "https://github.com/Seucwi-18/Monfleur#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

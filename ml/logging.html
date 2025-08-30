@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logging - Character Management Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">CML</div>
+                    <span class="logo-text">Character Manager</span>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i>Dashboard</a></li>
+                <li><a href="upload.html" class="nav-link"><i class="fas fa-upload"></i>Upload Character</a></li>
+                <li><a href="database.html" class="nav-link"><i class="fas fa-database"></i>Character Database</a></li>
+                <li><a href="user-management.html" class="nav-link"><i class="fas fa-users-cog"></i>User Management</a></li>
+                <li><a href="profile-settings.html" class="nav-link"><i class="fas fa-user-cog"></i>Profile Settings</a></li>
+                <li><a href="logging.html" class="nav-link active"><i class="fas fa-file-text"></i>Logging</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <!-- Header content will be populated by DashboardHeader component -->
+            </header>
+
+            <div class="content-area">
+                <div class="logging-header">
+                    <h2>System Logs</h2>
+                    <p>View all system activities and changes</p>
+                </div>
+
+                <!-- Log Filters -->
+                <div class="card">
+                    <div class="card-content">
+                        <div class="log-filters">
+                            <select id="logTypeFilter">
+                                <option value="all">All Types</option>
+                                <option value="upload">Uploads</option>
+                                <option value="edit">Edits</option>
+                                <option value="delete">Deletions</option>
+                                <option value="system">System</option>
+                            </select>
+                            <select id="logDateFilter">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                            <button class="btn btn-outline" onclick="exportLogs()">
+                                <i class="fas fa-download"></i>Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Table -->
+                <div class="card">
+                    <div class="card-content">
+                        <div class="logs-table-container">
+                            <table class="logs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Type</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logsTableBody">
+                                    <!-- Logs will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Header Component -->
+    <script src="components/header.js"></script>
+    <script>
+        // Initialize header component
+        document.addEventListener('DOMContentLoaded', function() {
+            new DashboardHeader({
+                pageTitle: 'System Logs',
+                userRole: 'Moderator',
+                showSwitchAccount: true
+            });
+        });
+    </script>
+    <script src="logging.js"></script>
+</body>
+</html>
