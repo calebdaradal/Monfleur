@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Directory Access Control</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .status-card.restricted {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .status-card.allowed {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .code {
+            background: #f1f3f4;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .test-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .test-link {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+        }
+        
+        .test-link:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ ML Directory Access Control</h1>
+        <p>Administrative interface for managing ML directory navigation restrictions</p>
+    </div>
+    
+    <div class="container">
+        <h2>📊 Current Status</h2>
+        
+        <div class="status-grid">
+            <div class="status-card" id="statusCard">
+                <div class="icon">🔍</div>
+                <h3>Restriction Status</h3>
+                <p id="statusText">Loading...</p>
+                <p><strong>Flag:</strong> <span id="flagValue" class="code">Loading...</span></p>
+            </div>
+            
+            <div class="status-card">
+                <div class="icon">⏰</div>
+                <h3>Last Updated</h3>
+                <p id="lastUpdated">Loading...</p>
+            </div>
+            
+            <div class="status-card">
+                <div class="icon">🌐</div>
+                <h3>Current Location</h3>
+                <p><span class="code" id="currentPath">Loading...</span></p>
+            </div>
+        </div>
+        
+        <div class="alert alert-info">
+            <h4>ℹ️ How It Works</h4>
+            <p>The <span class="code">IsThisFirstTime_Log_From_LiveServer</span> flag controls access to the entire ML directory:</p>
+            <ul>
+                <li><strong>When TRUE:</strong> All ML pages are blocked and users are redirected</li>
+                <li><strong>When FALSE/NULL:</strong> Normal access to ML directory is allowed</li>
+                <li><strong>Scope:</strong> Affects all pages within the <span class="code">ml/</span> directory</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>🎛️ Control Panel</h2>
+        
+        <div style="text-align: center; margin: 2rem 0;">
+            <button class="btn btn-danger" onclick="enableRestriction()">
+                🔒 Enable ML Restriction
+            </button>
+            
+            <button class="btn btn-success" onclick="disableRestriction()">
+                🔓 Disable ML Restriction
+            </button>
+            
+            <button class="btn btn-secondary" onclick="clearRestriction()">
+                🗑️ Clear Restriction Flag
+            </button>
+            
+            <button class="btn" onclick="refreshStatus()">
+                🔄 Refresh Status
+            </button>
+        </div>
+        
+        <div class="alert alert-warning">
+            <h4>⚠️ Important Notes</h4>
+            <ul>
+                <li>Changes take effect immediately for new page loads</li>
+                <li>Users currently on ML pages may need to refresh to see restrictions</li>
+                <li>The restriction applies to ALL users, regardless of role</li>
+                <li>Use this feature during maintenance or first-time setup scenarios</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>🧪 Test Navigation</h2>
+        <p>Try accessing these ML directory pages to test the restriction:</p>
+        
+        <div class="test-links">
+            <a href="ml/index.html" class="test-link" target="_blank">
+                <div class="icon">🏠</div>
+                <strong>Dashboard</strong>
+                <br><small>ml/index.html</small>
+            </a>
+            
+            <a href="ml/upload.html" class="test-link" target="_blank">
+                <div class="icon">📤</div>
+                <strong>Upload</strong>
+                <br><small>ml/upload.html</small>
+            </a>
+            
+            <a href="ml/database.html" class="test-link" target="_blank">
+                <div class="icon">🗄️</div>
+                <strong>Database</strong>
+                <br><small>ml/database.html</small>
+            </a>
+            
+            <a href="ml/user-management.html" class="test-link" target="_blank">
+                <div class="icon">👥</div>
+                <strong>User Management</strong>
+                <br><small>ml/user-management.html</small>
+            </a>
+            
+            <a href="ml/test-restriction.html" class="test-link" target="_blank">
+                <div class="icon">🛡️</div>
+                <strong>Test Page</strong>
+                <br><small>ml/test-restriction.html</small>
+            </a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>📋 Usage Instructions</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            <div>
+                <h3>🔒 To Restrict Access:</h3>
+                <ol>
+                    <li>Click "Enable ML Restriction"</li>
+                    <li>Verify status shows "RESTRICTED"</li>
+                    <li>Test by clicking ML page links above</li>
+                    <li>Users will see a redirect message</li>
+                </ol>
+            </div>
+            
+            <div>
+                <h3>🔓 To Allow Access:</h3>
+                <ol>
+                    <li>Click "Disable ML Restriction"</li>
+                    <li>Verify status shows "ALLOWED"</li>
+                    <li>Test by clicking ML page links above</li>
+                    <li>Users can access pages normally</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load the ML Access Control utility -->
+    <script src="utils/ml-access-control.js"></script>
+    
+    <script>
+        // Update status display
+        function updateStatus() {
+            const status = mlAccessControl.getStatus();
+            const statusCard = document.getElementById('statusCard');
+            const statusText = document.getElementById('statusText');
+            const flagValue = document.getElementById('flagValue');
+            const lastUpdated = document.getElementById('lastUpdated');
+            const currentPath = document.getElementById('currentPath');
+            
+            // Update text content
+            statusText.textContent = status.isRestricted ? 'RESTRICTED' : 'ALLOWED';
+            flagValue.textContent = status.flagValue || 'null';
+            lastUpdated.textContent = new Date().toLocaleString();
+            currentPath.textContent = window.location.pathname;
+            
+            // Update card styling
+            statusCard.className = 'status-card ' + (status.isRestricted ? 'restricted' : 'allowed');
+        }
+        
+        // Control functions
+        function enableRestriction() {
+            mlAccessControl.enableRestriction();
+            updateStatus();
+            showNotification('🔒 ML directory access has been RESTRICTED', 'danger');
+        }
+        
+        function disableRestriction() {
+            mlAccessControl.disableRestriction();
+            updateStatus();
+            showNotification('🔓 ML directory access has been ENABLED', 'success');
+        }
+        
+        function clearRestriction() {
+            mlAccessControl.clearRestriction();
+            updateStatus();
+            showNotification('🗑️ ML directory restriction flag has been CLEARED', 'info');
+        }
+        
+        function refreshStatus() {
+            updateStatus();
+            mlAccessControl.logStatus();
+            showNotification('🔄 Status refreshed', 'info');
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+                min-width: 300px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus();
+            
+            // Auto-refresh status every 5 seconds
+            setInterval(updateStatus, 5000);
+            
+            console.log('🎛️ ML Access Control Panel initialized');
+            mlAccessControl.logStatus();
+        });
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

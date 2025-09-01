@@ -53,6 +53,11 @@
             background: var(--input-background);
             color: var(--text-primary);
             transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+        
+        .password-input-wrapper .form-input {
+            padding-right: 48px;
         }
 
         .form-input:focus {
@@ -100,12 +105,47 @@
             font-size: 0.7rem;
         }
 
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0;
+        }
+        
+        .password-toggle-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: color 0.2s ease;
+            z-index: 2;
+        }
+        
+        .password-toggle-btn:hover {
+            color: var(--primary-color);
+        }
+        
+        .password-toggle-btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
         .feedback {
             margin-top: 8px;
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 0.8rem;
             display: none;
+            clear: both;
+            position: relative;
+            z-index: 0;
+            width: 100%;
+            box-sizing: border-box;
+            word-wrap: break-word;
         }
 
         .feedback.success {
@@ -178,6 +218,13 @@
             color: #2563eb;
             border: 1px solid rgba(59, 130, 246, 0.2);
         }
+
+        .section-description {
+            margin: 0 0 16px 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -192,12 +239,7 @@
             </div>
             <nav>
                 <ul class="sidebar-nav">
-                    <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i>Dashboard</a></li>
-                    <li><a href="upload.html" class="nav-link"><i class="fas fa-upload"></i>Upload Character</a></li>
-                    <li><a href="database.html" class="nav-link"><i class="fas fa-database"></i>Character Database</a></li>
-                    <li><a href="user-management.html" class="nav-link"><i class="fas fa-users-cog"></i>User Management</a></li>
-                    <li><a href="profile-settings.html" class="nav-link active"><i class="fas fa-user-cog"></i>Profile Settings</a></li>
-                    <li><a href="logging.html" class="nav-link"><i class="fas fa-file-text"></i>Logging</a></li>
+                    <!-- Navigation items will be populated by DashboardNavigation component -->
                 </ul>
             </nav>
             <div class="sidebar-footer">
@@ -228,7 +270,7 @@
                     <h3><i class="fas fa-info-circle"></i>Current Profile Information</h3>
                     <div class="current-info">
                         <p><strong>Email:</strong> <span id="currentEmail">Loading...</span></p>
-                        <p><strong>Display Name:</strong> <span id="currentDisplayName">Loading...</span></p>
+
                         <p><strong>Username:</strong> <span id="currentUsername">Loading...</span></p>
                         <p><strong>Role:</strong> <span id="currentRole">Loading...</span></p>
                     </div>
@@ -236,17 +278,6 @@
 
                 <!-- Profile Settings Form -->
                 <form id="profileSettingsForm">
-                    <!-- Display Name Section -->
-                    <div class="profile-card">
-                        <h3><i class="fas fa-user"></i>Display Name</h3>
-                        <div class="form-group">
-                            <label for="displayName" class="form-label">Display Name *</label>
-                            <input type="text" id="displayName" name="displayName" class="form-input" 
-                                   placeholder="Enter your display name" required>
-                            <div id="displayNameFeedback" class="feedback"></div>
-                        </div>
-                    </div>
-
                     <!-- Username Section -->
                     <div class="profile-card">
                         <h3><i class="fas fa-at"></i>Username</h3>
@@ -270,26 +301,42 @@
 
                     <!-- Password Section -->
                     <div class="profile-card">
-                        <h3><i class="fas fa-lock"></i>Change Password</h3>
+                        <h3><i class="fas fa-lock"></i>Change Password (Optional)</h3>
+                        <p class="section-description">Leave password fields empty if you only want to change your username.</p>
                         <div class="form-group">
-                            <label for="currentPassword" class="form-label">Current Password *</label>
-                            <input type="password" id="currentPassword" name="currentPassword" class="form-input" 
-                                   placeholder="Enter your current password" required>
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="currentPassword" name="currentPassword" class="form-input" 
+                                       placeholder="Enter your current password">
+                                <button type="button" class="password-toggle-btn" data-target="currentPassword" title="Show/Hide Password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                             <div id="currentPasswordFeedback" class="feedback"></div>
                         </div>
                         <div class="form-group">
-                            <label for="newPassword" class="form-label">New Password *</label>
-                            <input type="password" id="newPassword" name="newPassword" class="form-input" 
-                                   placeholder="Enter your new password" required>
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="newPassword" name="newPassword" class="form-input" 
+                                       placeholder="Enter your new password">
+                                <button type="button" class="password-toggle-btn" data-target="newPassword" title="Show/Hide Password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                             <div class="password-requirements">
                                 Minimum 6 characters required
                             </div>
                             <div id="newPasswordFeedback" class="feedback"></div>
                         </div>
                         <div class="form-group">
-                            <label for="confirmPassword" class="form-label">Confirm New Password *</label>
-                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" 
-                                   placeholder="Confirm your new password" required>
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" 
+                                       placeholder="Confirm your new password">
+                                <button type="button" class="password-toggle-btn" data-target="confirmPassword" title="Show/Hide Password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                             <div id="confirmPasswordFeedback" class="feedback"></div>
                         </div>
                     </div>
@@ -310,14 +357,22 @@
 
     <!-- Header Component -->
     <script src="components/header.js"></script>
+    <!-- Navigation Component -->
+    <script src="components/navigation.js"></script>
     <script>
-        // Initialize header component
-        document.addEventListener('DOMContentLoaded', function() {
-            new DashboardHeader({
+        // Initialize header and navigation components
+        document.addEventListener('DOMContentLoaded', async function() {
+            window.dashboardHeaderInstance = new DashboardHeader({
                 pageTitle: 'Profile Settings',
                 userRole: 'Moderator',
                 showSwitchAccount: true
             });
+            
+            // Initialize navigation with async role loading
+            const navigation = new DashboardNavigation({
+                currentPage: 'profile-settings.html'
+            });
+            // Navigation init is now async and handles role loading internally
         });
     </script>
     <script type="module" src="profile-settings.js"></script>

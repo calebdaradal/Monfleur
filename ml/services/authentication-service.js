@@ -54,6 +54,9 @@ class AuthenticationService {
                 limit
             };
 
+            // Restore session if available
+            this.restoreSession();
+            
             this.isInitialized = true;
             console.log('✅ Authentication Service initialized successfully');
             return true;
@@ -127,8 +130,8 @@ class AuthenticationService {
                 lastLogin: new Date().toISOString()
             };
 
-            // Set current user
-            this.currentUser = authenticatedUser;
+            // Set current user and store in session storage
+            this.setCurrentUser(authenticatedUser);
 
             console.log('✅ User authenticated successfully:', email);
             return {
@@ -252,6 +255,11 @@ class AuthenticationService {
             sessionStorage.setItem('adminEmail', user.email);
             sessionStorage.setItem('currentUser', JSON.stringify(user));
             
+            // Store username separately for easy access
+            if (user.username) {
+                sessionStorage.setItem('username', user.username);
+            }
+            
             console.log(`✅ Current user set: ${user.email} (${user.role})`);
             return true;
         } catch (error) {
@@ -340,6 +348,7 @@ class AuthenticationService {
             this.currentUser = null;
             sessionStorage.removeItem('adminEmail');
             sessionStorage.removeItem('currentUser');
+            sessionStorage.removeItem('username');
             console.log('✅ User logged out successfully');
         } catch (error) {
             console.error('❌ Error during logout:', error);
@@ -356,7 +365,7 @@ class AuthenticationService {
         if (!this.isAuthenticated()) {
             return {
                 hasAccess: false,
-                redirectTo: 'login.html',
+                redirectTo: '../login.html',
                 reason: 'Not authenticated'
             };
         }
@@ -369,7 +378,7 @@ class AuthenticationService {
                 if (!this.isAdministrator()) {
                     return {
                         hasAccess: false,
-                        redirectTo: this.isModerator() ? 'profile-settings.html' : 'login.html',
+                        redirectTo: this.isModerator() ? 'profile-settings.html' : '../login.html',
                         reason: 'Insufficient privileges - Administrator access required'
                     };
                 }
@@ -379,7 +388,7 @@ class AuthenticationService {
                 if (!this.isModerator()) {
                     return {
                         hasAccess: false,
-                        redirectTo: this.isAdministrator() ? 'user-management.html' : 'login.html',
+                        redirectTo: this.isAdministrator() ? 'user-management.html' : '../login.html',
                         reason: 'Insufficient privileges - Moderator access required'
                     };
                 }
@@ -389,7 +398,7 @@ class AuthenticationService {
                 if (!this.hasAdminPrivileges()) {
                     return {
                         hasAccess: false,
-                        redirectTo: 'login.html',
+                        redirectTo: '../login.html',
                         reason: 'Admin privileges required'
                     };
                 }

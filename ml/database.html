@@ -18,12 +18,7 @@
                 </div>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i>Dashboard</a></li>
-                <li><a href="upload.html" class="nav-link"><i class="fas fa-upload"></i>Upload Character</a></li>
-                <li><a href="database.html" class="nav-link active"><i class="fas fa-database"></i>Character Database</a></li>
-                <li><a href="user-management.html" class="nav-link"><i class="fas fa-users-cog"></i>User Management</a></li>
-                <li><a href="profile-settings.html" class="nav-link"><i class="fas fa-user-cog"></i>Profile Settings</a></li>
-                <li><a href="logging.html" class="nav-link"><i class="fas fa-file-text"></i>Logging</a></li>
+                <!-- Navigation items will be populated by DashboardNavigation component -->
             </ul>
         </nav>
 
@@ -104,17 +99,23 @@
     
     <!-- Header Component -->
     <script src="components/header.js"></script>
+    <!-- Navigation Component -->
+    <script src="components/navigation.js"></script>
     <script>
-        // Initialize header component
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize header and navigation components
+        document.addEventListener('DOMContentLoaded', async function() {
             new DashboardHeader({
                 pageTitle: 'Character Database',
                 userRole: 'Moderator',
                 showSwitchAccount: true
             });
+            
+            // Initialize navigation with async role loading
+            const navigation = new DashboardNavigation({
+                currentPage: 'database.html'
+            });
+            // Navigation init is now async and handles role loading internally
         });
     </script>
-    <!-- Dashboard JavaScript for header user info -->
-    <script src="dashboard.js"></script>
 </body>
 </html>

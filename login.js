@@ -286,13 +286,18 @@ class AuthenticationManager {
                 uid: user.uid,
                 role: user.role || 'user',
                 name: user.name,
+                username: user.username,
                 status: user.status
             };
             
             // Store in sessionStorage for user management system
                 sessionStorage.setItem('adminEmail', user.email);
                 sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-                console.log('💾 DEBUG: Session storage updated with adminEmail and currentUser');
+                // Store username separately for easy access
+                if (user.username) {
+                    sessionStorage.setItem('username', user.username);
+                }
+                console.log('💾 DEBUG: Session storage updated with adminEmail, currentUser, and username');
             
             return {
                 success: true,
@@ -451,6 +456,9 @@ class LoginUIManager {
         
         // Username input restrictions for login field
         this.setupUsernameInputRestrictions();
+        
+        // Password toggle functionality
+        this.setupPasswordToggle();
     }
 
     /**
@@ -503,6 +511,25 @@ class LoginUIManager {
                 }
             }
         });
+    }
+
+    /**
+     * Setup password toggle functionality
+     * Handles show/hide password functionality for the login form
+     */
+    setupPasswordToggle() {
+        const toggleButton = document.getElementById('passwordToggle');
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('passwordToggleIcon');
+        
+        if (toggleButton && passwordInput && toggleIcon) {
+            toggleButton.addEventListener('click', () => {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                toggleIcon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+                toggleButton.title = isPassword ? 'Hide Password' : 'Show Password';
+            });
+        }
     }
 
     /**
@@ -655,12 +682,16 @@ class LoginUIManager {
         const errorElement = document.createElement('div');
         errorElement.className = 'field-error';
         errorElement.textContent = message;
-        errorElement.style.color = '#dc2626';
-        errorElement.style.fontSize = '0.875rem';
-        errorElement.style.marginTop = '0.25rem';
 
-        // Insert after field
-        field.parentNode.insertBefore(errorElement, field.nextSibling);
+        // Check if field is inside a password wrapper
+        const passwordWrapper = field.closest('.password-input-wrapper');
+        if (passwordWrapper) {
+            // Insert after the password wrapper
+            passwordWrapper.parentNode.insertBefore(errorElement, passwordWrapper.nextSibling);
+        } else {
+            // Insert after field for regular inputs
+            field.parentNode.insertBefore(errorElement, field.nextSibling);
+        }
     }
 
     /**
@@ -669,9 +700,21 @@ class LoginUIManager {
      */
     clearFieldError(field) {
         field.classList.remove('error');
-        const errorElement = field.parentNode.querySelector('.field-error');
-        if (errorElement) {
-            errorElement.remove();
+        
+        // Check if field is inside a password wrapper
+        const passwordWrapper = field.closest('.password-input-wrapper');
+        if (passwordWrapper) {
+            // Look for error element after the password wrapper
+            const errorElement = passwordWrapper.parentNode.querySelector('.field-error');
+            if (errorElement) {
+                errorElement.remove();
+            }
+        } else {
+            // Look for error element after the field for regular inputs
+            const errorElement = field.parentNode.querySelector('.field-error');
+            if (errorElement) {
+                errorElement.remove();
+            }
         }
     }
 

@@ -37,7 +37,7 @@ class DashboardManager {
             const authInitialized = await this.authService.initialize();
             if (!authInitialized) {
                 console.error('❌ Authentication service initialization failed');
-                window.location.href = 'login.html';
+                window.location.href = '../login.html';
                 return false;
             }
             
@@ -219,7 +219,7 @@ class DashboardManager {
             return true;
         } else {
             console.warn('⚠️ Unauthorized user or invalid user object');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
             return false;
         }
     }
@@ -243,10 +243,12 @@ class DashboardManager {
         let roleSpecificItems = [];
         
         if (this.userRole === 'administrator') {
+            // Administrators have access to user management
             roleSpecificItems = [
                 { href: 'user-management.html', icon: 'fas fa-users-cog', text: 'User Management' }
             ];
         } else if (this.userRole === 'moderator') {
+            // Moderators only have access to profile settings (user management disabled)
             roleSpecificItems = [
                 { href: 'profile-settings.html', icon: 'fas fa-user-cog', text: 'Profile Settings' }
             ];

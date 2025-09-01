@@ -87,7 +87,7 @@ class UserManagementSystem {
                 email: currentUser.email,
                 uid: currentUser.uid,
                 role: currentUser.role,
-                displayName: currentUser.displayName || currentUser.username
+                username: currentUser.username
             };
             console.log('✅ Current admin set from authentication service:', this.currentAdmin);
             return true;
@@ -106,7 +106,7 @@ class UserManagementSystem {
         const adminEmail = sessionStorage.getItem('adminEmail');
         if (!adminEmail) {
             console.warn('⚠️ No authenticated user found');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
             return false;
         }
 
@@ -125,7 +125,7 @@ class UserManagementSystem {
         // Check if user is an administrator
         if (!this.isAdministrator()) {
             console.warn('⚠️ Unauthorized access attempt - insufficient privileges');
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
             return false;
         }
 
@@ -205,8 +205,8 @@ class UserManagementSystem {
             const uid = crypto.randomUUID();
             
             // Validate required fields
-            if (!userData.email || !userData.displayName) {
-                throw new Error('Email and display name are required');
+            if (!userData.email || !userData.username) {
+                throw new Error('Email and username are required');
             }
 
             // Check if user already exists
@@ -220,7 +220,7 @@ class UserManagementSystem {
                 uid: uid,
                 email: userData.email,
                 username: userData.username || '',
-                displayName: userData.displayName || '',
+
                 role: userData.role || 'user',
                 active: userData.active !== undefined ? userData.active : true,
                 // Hash password before storage (using Web Crypto API)
@@ -431,7 +431,6 @@ class UserManagementSystem {
             const userDoc = querySnapshot.docs[0];
             const updateData = {
                 username: userData.username,
-                displayName: userData.displayName,
                 email: userData.email,
                 role: userData.role,
                 active: userData.active,
@@ -683,8 +682,33 @@ class UserManagementUI {
         
         // Toggle active status text update
         this.setupToggleTextUpdate();
+        
+        // Password toggle functionality
+        this.setupPasswordToggle();
     }
     
+    /**
+     * Setup password toggle functionality
+     */
+    setupPasswordToggle() {
+        const toggleButtons = document.querySelectorAll('.password-toggle-btn');
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = button.querySelector('i');
+                
+                if (passwordInput && icon) {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    icon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+                    button.title = isPassword ? 'Hide Password' : 'Show Password';
+                }
+            });
+        });
+    }
+
     /**
      * Setup toggle text update functionality
      * Updates the toggle text based on the checkbox state
@@ -910,8 +934,7 @@ class UserManagementUI {
 
     /**
      * Generate a random username by combining adjective and animal
-     * Also updates display name with the same values in proper case
-     * Uses sentence case formatting for professional appearance
+     * Uses concatenated format without underscore: AdjectiveAnimal
      */
     async generateUsername() {
         try {
@@ -921,36 +944,24 @@ class UserManagementUI {
             const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
             const randomAnimal = animals[Math.floor(Math.random() * animals.length)];
             
-            // Apply sentence case formatting: capitalize first word only
-            const username = `${randomAdjective.charAt(0).toUpperCase() + randomAdjective.slice(1).toLowerCase()}_${randomAnimal.toLowerCase()}`;
-            
-            // Apply display name formatting: proper case with space
-            const displayName = `${randomAdjective.charAt(0).toUpperCase() + randomAdjective.slice(1).toLowerCase()} ${randomAnimal.toLowerCase()}`;
+            // Create concatenated username: AdjectiveAnimal (no underscore)
+            const username = `${randomAdjective}${randomAnimal}`;
             
             const usernameInput = document.getElementById('userUsername');
-            const displayNameInput = document.getElementById('userDisplayName');
             
             if (usernameInput) {
                 usernameInput.value = username;
             }
-            if (displayNameInput) {
-                displayNameInput.value = displayName;
-            }
         } catch (error) {
             console.error('Error generating username:', error);
-            // Fallback to simple random username and display name
+            // Fallback to simple random username
             const fallbackId = Math.random().toString(36).substr(2, 6);
-            const fallbackUsername = `User_${fallbackId}`;
-            const fallbackDisplayName = `User ${fallbackId}`;
+            const fallbackUsername = `User${fallbackId}`;
             
             const usernameInput = document.getElementById('userUsername');
-            const displayNameInput = document.getElementById('userDisplayName');
             
             if (usernameInput) {
                 usernameInput.value = fallbackUsername;
-            }
-            if (displayNameInput) {
-                displayNameInput.value = fallbackDisplayName;
             }
         }
     }
@@ -1060,7 +1071,6 @@ class UserManagementUI {
             email: document.getElementById('userEmail').value.trim(),
             password: document.getElementById('userPassword').value,
             username: document.getElementById('userUsername').value.trim(),
-            displayName: document.getElementById('userDisplayName').value.trim(),
             role: document.getElementById('userRole').value,
             active: document.getElementById('userActive').checked
         };
@@ -1184,7 +1194,7 @@ class UserManagementUI {
             <tr>
                 <td>
                     <div class="user-info">
-                        <div class="user-name">${user.displayName || 'N/A'}</div>
+                        <div class="user-name">${user.username || 'N/A'}</div>
                         <div class="user-id">${user.uid}</div>
                     </div>
                 </td>
@@ -1339,7 +1349,6 @@ class UserManagementUI {
             
             // Populate form fields
             document.getElementById('userUsername').value = user.username || '';
-            document.getElementById('userDisplayName').value = user.displayName || '';
             document.getElementById('userEmail').value = user.email || '';
             document.getElementById('userRole').value = user.role || 'user';
             
@@ -1535,7 +1544,17 @@ document.addEventListener('DOMContentLoaded', async function() {
              return;
          }
          
-         console.log('✅ DEBUG: Valid session found for:', adminEmail);
+         // Parse current user and check role
+         const userData = JSON.parse(currentUser);
+         if (userData.role !== 'administrator' && userData.role !== 'admin') {
+             // Redirect moderators to dashboard
+             console.log('🚫 DEBUG: Access denied - User is not an administrator');
+             console.log('👤 DEBUG: User role:', userData.role);
+             window.location.href = 'index.html';
+             return;
+         }
+         
+         console.log('✅ DEBUG: Valid administrator session found for:', adminEmail);
          
          // Set current admin from session
          userManagementSystem.setCurrentAdmin(adminEmail);

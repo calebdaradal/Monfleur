@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Restriction Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .code {
+            background: #f1f3f4;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Guard - Will check for restrictions -->
+    <script src="common/page-guard.js"></script>
+    
+    <div class="container">
+        <h1>🛡️ Navigation Restriction Test</h1>
+        <p>This page demonstrates the navigation restriction system for the ML directory.</p>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong> This page is within the <code>ml/</code> directory and will be blocked if the restriction flag is set to <code>true</code>.
+        </div>
+        
+        <div class="status-card">
+            <h3>Current Status</h3>
+            <p><strong>Flag Value:</strong> <span id="flagValue" class="code">Loading...</span></p>
+            <p><strong>Is Restricted:</strong> <span id="isRestricted" class="code">Loading...</span></p>
+            <p><strong>Current Path:</strong> <span id="currentPath" class="code">Loading...</span></p>
+            <p><strong>Page Guard Status:</strong> <span id="guardStatus" class="code">Loading...</span></p>
+        </div>
+        
+        <div class="info">
+            <h3>🔧 Test Controls</h3>
+            <p>Use these buttons to test the navigation restriction functionality:</p>
+            
+            <button class="btn btn-danger" onclick="enableRestriction()">
+                🔒 Enable Restriction
+            </button>
+            
+            <button class="btn btn-success" onclick="disableRestriction()">
+                🔓 Disable Restriction
+            </button>
+            
+            <button class="btn" onclick="refreshStatus()">
+                🔄 Refresh Status
+            </button>
+            
+            <button class="btn" onclick="testNavigation()">
+                🧪 Test Navigation
+            </button>
+        </div>
+        
+        <div class="info">
+            <h3>📋 How It Works</h3>
+            <ol>
+                <li>The <span class="code">IsThisFirstTime_Log_From_LiveServer</span> flag is stored in localStorage</li>
+                <li>When set to <span class="code">"true"</span>, all pages in the <span class="code">ml/</span> directory are blocked</li>
+                <li>Users are redirected to <span class="code">../index.html</span> with a friendly message</li>
+                <li>The restriction can be cleared by setting the flag to <span class="code">"false"</span> or removing it</li>
+            </ol>
+        </div>
+        
+        <div class="status-card">
+            <h3>🔗 Navigation Links</h3>
+            <p>Try accessing these ML pages:</p>
+            <a href="index.html" class="btn">Dashboard</a>
+            <a href="upload.html" class="btn">Upload</a>
+            <a href="database.html" class="btn">Database</a>
+            <a href="user-management.html" class="btn">User Management</a>
+            <br><br>
+            <a href="../index.html" class="btn">← Back to Main App</a>
+        </div>
+    </div>
+    
+    <script>
+        // Update status display
+        function updateStatus() {
+            const flagValue = localStorage.getItem('IsThisFirstTime_Log_From_LiveServer');
+            const isRestricted = flagValue === 'true';
+            const currentPath = window.location.pathname;
+            const guardStatus = window.pageGuard ? 'Initialized' : 'Not Available';
+            
+            document.getElementById('flagValue').textContent = flagValue || 'null';
+            document.getElementById('isRestricted').textContent = isRestricted ? 'Yes' : 'No';
+            document.getElementById('currentPath').textContent = currentPath;
+            document.getElementById('guardStatus').textContent = guardStatus;
+            
+            // Update page background based on restriction status
+            document.body.style.background = isRestricted ? '#ffe6e6' : '#e6ffe6';
+        }
+        
+        // Enable restriction
+        function enableRestriction() {
+            localStorage.setItem('IsThisFirstTime_Log_From_LiveServer', 'true');
+            updateStatus();
+            alert('🔒 Restriction enabled! Try refreshing the page or navigating to another ML page.');
+        }
+        
+        // Disable restriction
+        function disableRestriction() {
+            localStorage.setItem('IsThisFirstTime_Log_From_LiveServer', 'false');
+            updateStatus();
+            alert('🔓 Restriction disabled! ML pages are now accessible.');
+        }
+        
+        // Refresh status
+        function refreshStatus() {
+            updateStatus();
+            
+            if (window.pageGuard) {
+                const status = window.pageGuard.getRestrictionStatus();
+                console.log('Page Guard Status:', status);
+            }
+        }
+        
+        // Test navigation
+        function testNavigation() {
+            const isRestricted = localStorage.getItem('IsThisFirstTime_Log_From_LiveServer') === 'true';
+            
+            if (isRestricted) {
+                alert('🚫 Navigation is currently restricted. You will be redirected if you try to access ML pages.');
+            } else {
+                alert('✅ Navigation is allowed. You can freely access ML pages.');
+            }
+        }
+        
+        // Initialize status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus();
+            
+            // Update status every 2 seconds
+            setInterval(updateStatus, 2000);
+        });
+        
+        // Log page guard events
+        if (window.pageGuard) {
+            console.log('Page Guard is available:', window.pageGuard);
+        }
+    </script>
+</body>
+</html>

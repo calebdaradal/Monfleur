@@ -99,60 +99,46 @@ class ProfileSettingsSystem {
         }
 
         try {
-            const { doc, updateDoc } = this.firestoreFunctions;
+            const { collection, query, where, getDocs, updateDoc } = this.firestoreFunctions;
             
-            // For hardcoded users, we'll store profile updates in a separate collection
-            const profileRef = doc(this.db, 'user_profiles', this.currentUser.uid);
+            // Find the user document in the 'users' collection
+            const usersRef = collection(this.db, 'users');
+            const q = query(usersRef, where('email', '==', this.currentUser.email));
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+                throw new Error('User not found in users collection');
+            }
+            
+            const userDoc = querySnapshot.docs[0];
             
             const updateData = {
                 ...profileData,
-                updatedAt: new Date().toISOString(),
-                email: this.currentUser.email // Keep email unchanged
+                updatedAt: new Date().toISOString()
             };
+            
+            // If password is being updated, store it as 'password' field
+            if (profileData.passwordHash) {
+                updateData.password = profileData.passwordHash;
+                delete updateData.passwordHash; // Remove the temporary field
+            }
 
-            await updateDoc(profileRef, updateData);
+            await updateDoc(userDoc.ref, updateData);
             
             // Update local user data
             this.currentUser = {
                 ...this.currentUser,
-                ...profileData
+                ...updateData
             };
 
-            console.log('✅ Profile updated successfully');
+            // Update session storage through authentication service
+            this.authService.setCurrentUser(this.currentUser);
+
+            console.log('✅ Profile updated successfully in users collection and session storage');
             return true;
         } catch (error) {
-            // If document doesn't exist, create it
-            if (error.code === 'not-found') {
-                try {
-                    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-                    const profileRef = doc(this.db, 'user_profiles', this.currentUser.uid);
-                    
-                    const newProfileData = {
-                        ...profileData,
-                        email: this.currentUser.email,
-                        role: this.currentUser.role,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    };
-
-                    await setDoc(profileRef, newProfileData);
-                    
-                    // Update local user data
-                    this.currentUser = {
-                        ...this.currentUser,
-                        ...profileData
-                    };
-
-                    console.log('✅ Profile created and updated successfully');
-                    return true;
-                } catch (createError) {
-                    console.error('❌ Error creating profile:', createError);
-                    throw createError;
-                }
-            } else {
-                console.error('❌ Error updating profile:', error);
-                throw error;
-            }
+            console.error('❌ Error updating profile:', error);
+            throw error;
         }
     }
 
@@ -166,19 +152,27 @@ class ProfileSettingsSystem {
         }
 
         try {
-            const { doc, getDoc } = this.firestoreFunctions;
-            const profileRef = doc(this.db, 'user_profiles', this.currentUser.uid);
-            const profileSnap = await getDoc(profileRef);
-
-            if (profileSnap.exists()) {
-                const profileData = profileSnap.data();
+            const { collection, query, where, getDocs } = this.firestoreFunctions;
+            
+            // Get user data from 'users' collection (where passwords are stored)
+            const usersRef = collection(this.db, 'users');
+            const q = query(usersRef, where('email', '==', this.currentUser.email));
+            const querySnapshot = await getDocs(q);
+            
+            if (!querySnapshot.empty) {
+                const userDoc = querySnapshot.docs[0];
+                const userData = userDoc.data();
+                
+                // Update current user with data from users collection
                 this.currentUser = {
                     ...this.currentUser,
-                    ...profileData
+                    ...userData,
+                    uid: userDoc.id // Use document ID as uid
                 };
+                
                 return this.currentUser;
             } else {
-                // Return default profile if no custom profile exists
+                console.warn('⚠️ User not found in users collection');
                 return this.currentUser;
             }
         } catch (error) {
@@ -270,8 +264,26 @@ class ProfileSettingsSystem {
      * @returns {Promise<boolean>} Verification result
      */
     async verifyPassword(password, storedHash) {
-        const hashedInput = await this.hashPassword(password);
-        return hashedInput === storedHash;
+        try {
+            // Check if stored hash has a prefix to identify hash type
+            if (storedHash && storedHash.startsWith('sha256:')) {
+                // Remove prefix and compare with our hash
+                const hashWithoutPrefix = storedHash.substring(7); // Remove 'sha256:' prefix
+                const hashedInput = await this.hashPassword(password);
+                return hashedInput === hashWithoutPrefix;
+            } else if (storedHash && storedHash.startsWith('base64:')) {
+                // Handle base64 encoded passwords
+                const base64Hash = btoa(password);
+                return storedHash === 'base64:' + base64Hash;
+            } else {
+                // Legacy hash without prefix - try direct comparison
+                const hashedInput = await this.hashPassword(password);
+                return hashedInput === storedHash;
+            }
+        } catch (error) {
+            console.error('❌ Password verification error:', error);
+            return false;
+        }
     }
 }
 
@@ -298,19 +310,16 @@ class ProfileSettingsUI {
         
         // Current info elements
         this.currentEmail = document.getElementById('currentEmail');
-        this.currentDisplayName = document.getElementById('currentDisplayName');
         this.currentUsername = document.getElementById('currentUsername');
         this.currentRole = document.getElementById('currentRole');
         
         // Form inputs
-        this.displayNameInput = document.getElementById('displayName');
         this.usernameInput = document.getElementById('username');
         this.currentPasswordInput = document.getElementById('currentPassword');
         this.newPasswordInput = document.getElementById('newPassword');
         this.confirmPasswordInput = document.getElementById('confirmPassword');
         
         // Feedback elements
-        this.displayNameFeedback = document.getElementById('displayNameFeedback');
         this.usernameFeedback = document.getElementById('usernameFeedback');
         this.currentPasswordFeedback = document.getElementById('currentPasswordFeedback');
         this.newPasswordFeedback = document.getElementById('newPasswordFeedback');
@@ -325,7 +334,6 @@ class ProfileSettingsUI {
         this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
         
         // Real-time validation
-        this.displayNameInput.addEventListener('input', this.validateDisplayName.bind(this));
         this.usernameInput.addEventListener('input', this.validateUsername.bind(this));
         this.newPasswordInput.addEventListener('input', this.validateNewPassword.bind(this));
         this.confirmPasswordInput.addEventListener('input', this.validateConfirmPassword.bind(this));
@@ -334,7 +342,32 @@ class ProfileSettingsUI {
         document.getElementById('generateUsername').addEventListener('click', this.generateUsername.bind(this));
         document.getElementById('copyUsername').addEventListener('click', this.copyUsername.bind(this));
         
+        // Password toggle functionality
+        this.setupPasswordToggles();
+        
         // Logout functionality is now handled by the header component
+    }
+
+    /**
+     * Setup password toggle functionality
+     */
+    setupPasswordToggles() {
+        const toggleButtons = document.querySelectorAll('.password-toggle-btn');
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = button.querySelector('i');
+                
+                if (passwordInput && icon) {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    icon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+                    button.title = isPassword ? 'Hide Password' : 'Show Password';
+                }
+            });
+        });
     }
 
     /**
@@ -376,9 +409,9 @@ class ProfileSettingsUI {
         try {
             const adjective = this.adjectives[Math.floor(Math.random() * this.adjectives.length)];
             const animal = this.animals[Math.floor(Math.random() * this.animals.length)];
-            const number = Math.floor(Math.random() * 100);
             
-            const username = `${adjective}${animal}${number}`;
+            // Create concatenated username: AdjectiveAnimal (no underscore, no number)
+            const username = `${adjective}${animal}`;
             this.usernameInput.value = username;
             
             // Validate the generated username
@@ -415,20 +448,40 @@ class ProfileSettingsUI {
      */
     async loadCurrentProfile() {
         try {
-            const profile = await this.profileSystem.loadProfile();
+            // Get the most up-to-date profile from authentication service (session storage)
+            const currentUser = this.profileSystem.authService.getCurrentUser();
+            let profile;
+            
+            if (currentUser) {
+                // Use session storage data if available (most recent)
+                profile = currentUser;
+            } else {
+                // Fallback to database if session storage is not available
+                profile = await this.profileSystem.loadProfile();
+            }
             
             // Update current info display
             this.currentEmail.textContent = profile.email;
-            this.currentDisplayName.textContent = profile.displayName || 'System Moderator';
             this.currentUsername.textContent = profile.username || profile.email.split('@')[0];
             this.currentRole.textContent = profile.role.charAt(0).toUpperCase() + profile.role.slice(1);
             
             // Pre-fill form with current values
-            this.displayNameInput.value = profile.displayName || 'System Moderator';
             this.usernameInput.value = profile.username || profile.email.split('@')[0];
             
             // Store current password hash if available
-            this.currentPasswordHash = profile.passwordHash || await this.profileSystem.hashPassword('defaultPassword123');
+            // The passwordHash field in the database contains the hashed password
+            this.currentPasswordHash = profile.passwordHash || profile.password || null;
+            
+            if (!this.currentPasswordHash) {
+                console.warn('⚠️ No password hash found for user. Loading from database...');
+                // Try to load the full profile from database to get password hash
+                const fullProfile = await this.profileSystem.loadProfile();
+                this.currentPasswordHash = fullProfile.passwordHash || fullProfile.password || null;
+                
+                if (!this.currentPasswordHash) {
+                    console.error('❌ Unable to retrieve password hash from database');
+                }
+            }
             
         } catch (error) {
             console.error('Error loading profile:', error);
@@ -442,12 +495,27 @@ class ProfileSettingsUI {
     async handleFormSubmit(event) {
         event.preventDefault();
         
-        // Validate all fields
-        const isDisplayNameValid = this.validateDisplayName();
-        const isUsernameValid = this.validateUsername();
-        const isPasswordValid = this.validatePasswords();
+        // Check if user is trying to change password or just username
+        const newPassword = this.newPasswordInput.value.trim();
+        const currentPassword = this.currentPasswordInput.value.trim();
+        const confirmPassword = this.confirmPasswordInput.value.trim();
+        const isPasswordChange = newPassword || currentPassword || confirmPassword;
         
-        if (!isDisplayNameValid || !isUsernameValid || !isPasswordValid) {
+        // Validate username (always required)
+        const isUsernameValid = this.validateUsername();
+        
+        // Validate passwords only if user is trying to change password
+        let isPasswordValid = true;
+        if (isPasswordChange) {
+            isPasswordValid = this.validatePasswords();
+        } else {
+            // Clear any existing password validation errors when not changing password
+            this.hideCurrentPasswordFeedback();
+            this.hideNewPasswordFeedback();
+            this.hideConfirmPasswordFeedback();
+        }
+        
+        if (!isUsernameValid || !isPasswordValid) {
             this.showAlert('Please fix the validation errors before saving', 'error');
             return;
         }
@@ -456,15 +524,19 @@ class ProfileSettingsUI {
             this.setFormLoadingState(true);
             
             const profileData = {
-                displayName: this.displayNameInput.value.trim(),
                 username: this.usernameInput.value.trim()
             };
             
             // Add password hash if password is being changed
-            const newPassword = this.newPasswordInput.value;
-            if (newPassword) {
+            if (isPasswordChange && newPassword) {
+                // Check if we have the current password hash
+                if (!this.currentPasswordHash) {
+                    this.showCurrentPasswordFeedback('Unable to verify current password. Please refresh the page and try again.', 'error');
+                    this.setFormLoadingState(false);
+                    return;
+                }
+                
                 // Verify current password first
-                const currentPassword = this.currentPasswordInput.value;
                 const isCurrentPasswordValid = await this.profileSystem.verifyPassword(currentPassword, this.currentPasswordHash);
                 
                 if (!isCurrentPasswordValid) {
@@ -479,7 +551,11 @@ class ProfileSettingsUI {
             
             await this.profileSystem.updateProfile(profileData);
             
-            this.showAlert('Profile updated successfully!', 'success');
+            if (isPasswordChange) {
+                this.showAlert('Profile and password updated successfully!', 'success');
+            } else {
+                this.showAlert('Username updated successfully!', 'success');
+            }
             
             // Clear password fields
             this.currentPasswordInput.value = '';
@@ -497,30 +573,7 @@ class ProfileSettingsUI {
         }
     }
 
-    /**
-     * Validate display name
-     */
-    validateDisplayName() {
-        const displayName = this.displayNameInput.value.trim();
-        
-        if (!displayName) {
-            this.showDisplayNameFeedback('Display name is required', 'error');
-            return false;
-        }
-        
-        if (displayName.length < 2) {
-            this.showDisplayNameFeedback('Display name must be at least 2 characters', 'error');
-            return false;
-        }
-        
-        if (displayName.length > 50) {
-            this.showDisplayNameFeedback('Display name must be less than 50 characters', 'error');
-            return false;
-        }
-        
-        this.showDisplayNameFeedback('Display name is valid', 'success');
-        return true;
-    }
+
 
     /**
      * Validate username
@@ -589,34 +642,46 @@ class ProfileSettingsUI {
     /**
      * Validate all password fields
      */
+    /**
+     * Validate current password
+     */
+    validateCurrentPassword() {
+        const currentPassword = this.currentPasswordInput.value;
+        const newPassword = this.newPasswordInput.value;
+        
+        // Only validate if user is trying to change password
+        if (!newPassword) {
+            this.hideCurrentPasswordFeedback();
+            return true;
+        }
+        
+        if (!currentPassword) {
+            this.showCurrentPasswordFeedback('Current password is required to change password', 'error');
+            return false;
+        }
+        
+        if (!this.currentPasswordHash) {
+            this.showCurrentPasswordFeedback('Unable to verify password. Please refresh the page.', 'error');
+            return false;
+        }
+        
+        this.hideCurrentPasswordFeedback();
+        return true;
+    }
+
     validatePasswords() {
         const newPassword = this.newPasswordInput.value;
-        const currentPassword = this.currentPasswordInput.value;
         
         // If no new password, validation passes
         if (!newPassword) {
             return true;
         }
         
-        // If new password is provided, current password is required
-        if (!currentPassword) {
-            this.showCurrentPasswordFeedback('Current password is required to change password', 'error');
-            return false;
-        }
-        
+        const isCurrentPasswordValid = this.validateCurrentPassword();
         const isNewPasswordValid = this.validateNewPassword();
         const isConfirmPasswordValid = this.validateConfirmPassword();
         
-        return isNewPasswordValid && isConfirmPasswordValid;
-    }
-
-    /**
-     * Show feedback for display name
-     */
-    showDisplayNameFeedback(message, type) {
-        this.displayNameFeedback.textContent = message;
-        this.displayNameFeedback.className = `feedback ${type}`;
-        this.displayNameFeedback.style.display = 'block';
+        return isCurrentPasswordValid && isNewPasswordValid && isConfirmPasswordValid;
     }
 
     /**
@@ -635,6 +700,13 @@ class ProfileSettingsUI {
         this.currentPasswordFeedback.textContent = message;
         this.currentPasswordFeedback.className = `feedback ${type}`;
         this.currentPasswordFeedback.style.display = 'block';
+    }
+
+    /**
+     * Hide current password feedback
+     */
+    hideCurrentPasswordFeedback() {
+        this.currentPasswordFeedback.style.display = 'none';
     }
 
     /**
@@ -711,7 +783,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Check if user is logged in
         const adminEmail = sessionStorage.getItem('adminEmail');
         if (!adminEmail) {
-            window.location.href = 'login.html';
+            window.location.href = '../login.html';
             return;
         }
 
@@ -776,7 +848,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     <pre style="background: #f3f4f6; padding: 10px; border-radius: 5px; overflow: auto; margin-top: 10px;">${error.name}: ${error.message}</pre>
                 </details>
                 <button onclick="window.location.reload()" style="padding: 10px 20px; margin-top: 10px; cursor: pointer;">Retry</button>
-                <button onclick="window.location.href='login.html'" style="padding: 10px 20px; margin-top: 10px; cursor: pointer;">Back to Login</button>
+                <button onclick="window.location.href='../login.html'" style="padding: 10px 20px; margin-top: 10px; cursor: pointer;">Back to Login</button>
             </div>
         `;
     }

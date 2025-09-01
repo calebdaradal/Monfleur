@@ -64,13 +64,26 @@ class DashboardHeader {
      */
     createLogoutModal() {
         const modalHTML = `
-            <div class="modal-overlay" id="logoutModal" style="display: none;">
+            <div class="modal" id="logoutModal" style="display: none;">
                 <div class="modal-content">
-                    <h3>Switch Account</h3>
-                    <p>Are you sure you want to switch accounts? You will be logged out of the current session.</p>
-                    <div class="modal-actions">
+                    <div class="modal-header">
+                        <h3>
+                            <i class="fas fa-sign-out-alt"></i>
+                            Switch Account
+                        </h3>
+                        <button class="modal-close" id="closeLogoutModal" type="button">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to switch accounts? You will be logged out of the current session.</p>
+                    </div>
+                    <div class="modal-footer">
                         <button class="btn btn-outline" id="cancelLogout">Cancel</button>
-                        <button class="btn btn-danger" id="confirmLogout">Switch Account</button>
+                        <button class="btn btn-outline" id="confirmLogout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Switch Account
+                        </button>
                     </div>
                 </div>
             </div>
@@ -132,7 +145,10 @@ class DashboardHeader {
             document.addEventListener('click', (e) => {
                 if (e.target.id === 'confirmLogout') {
                     this.handleLogout();
-                } else if (e.target.id === 'cancelLogout' || e.target.classList.contains('modal-overlay')) {
+                } else if (e.target.id === 'cancelLogout' || 
+                          e.target.id === 'closeLogoutModal' || 
+                          e.target.closest('#closeLogoutModal') || 
+                          (e.target.classList.contains('modal') && e.target.id === 'logoutModal')) {
                     this.hideLogoutModal();
                 }
             });
@@ -156,25 +172,26 @@ class DashboardHeader {
 
     /**
      * Get user information from authentication service
-     * Fetches actual user data from Firestore
+     * Fetches actual user data from Firestore and session storage
      */
     async getUserInfo() {
         try {
             // Get current user from session storage
             const currentUserData = sessionStorage.getItem('currentUser');
             const adminEmail = sessionStorage.getItem('adminEmail');
+            const userRole = sessionStorage.getItem('userRole');
             
             if (currentUserData) {
                 const user = JSON.parse(currentUserData);
                 return {
-                    role: user.role || this.userRole,
+                    role: user.role || userRole || this.userRole,
                     displayName: user.displayName || user.username || user.name || null,
                     email: user.email
                 };
             } else if (adminEmail) {
                 // Fallback to email if no full user data available
                 return {
-                    role: this.userRole,
+                    role: userRole || this.userRole,
                     displayName: adminEmail.split('@')[0], // Use email prefix as fallback
                     email: adminEmail
                 };
@@ -182,13 +199,13 @@ class DashboardHeader {
             
             // Default fallback
             return {
-                role: this.userRole,
+                role: userRole || this.userRole,
                 displayName: null
             };
         } catch (error) {
             console.warn('Error getting user info:', error);
             return {
-                role: this.userRole,
+                role: sessionStorage.getItem('userRole') || this.userRole,
                 displayName: null
             };
         }
@@ -201,14 +218,65 @@ class DashboardHeader {
     updateHeaderInfo(userInfo) {
         const headerInfoElement = document.getElementById('headerUserInfo');
         if (headerInfoElement && userInfo) {
-            const displayText = userInfo.displayName 
-                ? `Hello, ${userInfo.displayName}`
-                : `Hello, User`;
+            let displayText;
+            
+            if (userInfo.displayName) {
+                displayText = `Welcome, ${userInfo.displayName}`;
+            } else if (userInfo.email) {
+                // Extract username from email for display
+                const username = this.extractUsernameFromEmail(userInfo.email);
+                displayText = `Welcome, ${username}`;
+            } else {
+                displayText = 'Welcome, User';
+            }
+            
+            // Add role information if available
+            if (userInfo.role && userInfo.role !== 'user') {
+                const roleDisplay = this.formatRole(userInfo.role);
+                displayText += ` (${roleDisplay})`;
+            }
+            
             headerInfoElement.textContent = displayText;
         }
     }
 
 
+
+    /**
+     * Extract username from email address
+     * @param {string} email - Email address
+     * @returns {string} Username portion of email
+     */
+    extractUsernameFromEmail(email) {
+        if (!email || typeof email !== 'string') {
+            return 'User';
+        }
+        
+        const atIndex = email.indexOf('@');
+        if (atIndex > 0) {
+            return email.substring(0, atIndex);
+        }
+        
+        return email;
+    }
+
+    /**
+     * Format role for display
+     * @param {string} role - User role
+     * @returns {string} Formatted role
+     */
+    formatRole(role) {
+        if (!role) return '';
+        
+        const roleMap = {
+            'administrator': 'Administrator',
+            'moderator': 'Moderator',
+            'user': 'User',
+            'admin': 'Administrator'
+        };
+        
+        return roleMap[role.toLowerCase()] || role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+    }
 
     /**
      * Update page title dynamically

@@ -411,6 +411,35 @@
             gap: 8px;
         }
 
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .password-toggle-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--muted-foreground);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: color 0.2s ease;
+            z-index: 1;
+        }
+        
+        .password-toggle-btn:hover {
+            color: var(--primary);
+        }
+        
+        .password-toggle-btn:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
         .password-display {
             flex: 1;
             font-family: 'Courier New', monospace;
@@ -495,12 +524,7 @@
                 </div>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i>Dashboard</a></li>
-                <li><a href="upload.html" class="nav-link"><i class="fas fa-upload"></i>Upload Character</a></li>
-                <li><a href="database.html" class="nav-link"><i class="fas fa-database"></i>Character Database</a></li>
-                <li><a href="user-management.html" class="nav-link active"><i class="fas fa-users-cog"></i>User Management</a></li>
-                <li><a href="profile-settings.html" class="nav-link"><i class="fas fa-user-cog"></i>Profile Settings</a></li>
-                <li><a href="logging.html" class="nav-link"><i class="fas fa-file-text"></i>Logging</a></li>
+                <!-- Navigation items will be populated by DashboardNavigation component -->
             </ul>
         </nav>
 
@@ -527,7 +551,12 @@
                             <div class="form-group">
                                 <label for="userPassword" class="form-label">Password *</label>
                                 <div class="password-generator-container">
-                                    <input type="text" id="userPassword" class="form-input password-display" placeholder="Generated password" readonly required>
+                                    <div class="password-input-wrapper">
+                                        <input type="password" id="userPassword" class="form-input password-display" placeholder="Generated password" readonly required>
+                                        <button type="button" class="password-toggle-btn" data-target="userPassword" title="Show/Hide Password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                     <div class="password-buttons">
                                         <button type="button" id="regeneratePassword" class="btn btn-secondary btn-sm" title="Generate new password">
                                             <i class="fas fa-sync-alt"></i>
@@ -554,11 +583,7 @@
                                 </div>
                                 <!-- <small class="form-help">Auto-generated username combining adjective and animal. Only letters, numbers, and special characters allowed (no spaces)</small> -->
                             </div>
-                            <div class="form-group">
-                                <label for="userDisplayName" class="form-label">Display Name</label>
-                                <input type="text" id="userDisplayName" class="form-input" placeholder="Fluffy jellyfish">
-                                <!-- <small class="form-help">Auto-synced with username (proper case formatting)</small> -->
-                            </div>
+
                             <div class="form-group">
                                 <label for="userRole" class="form-label">Role *</label>
                                 <select id="userRole" class="form-select" required>
@@ -684,19 +709,24 @@
 
     <!-- Header Component -->
     <script src="components/header.js"></script>
+    <!-- Navigation Component -->
+    <script src="components/navigation.js"></script>
     <script>
-        // Initialize header component
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize header and navigation components
+        document.addEventListener('DOMContentLoaded', async function() {
             new DashboardHeader({
                 pageTitle: 'User Management',
                 userRole: 'Admin',
                 showSwitchAccount: true
             });
+            
+            // Initialize navigation with async role loading
+            const navigation = new DashboardNavigation({
+                currentPage: 'user-management.html'
+            });
+            // Navigation init is now async and handles role loading internally
         });
     </script>
     <script type="module" src="user-management.js"></script>
-    
-    <!-- Dashboard JavaScript for header user info -->
-    <script src="dashboard.js"></script>
 </body>
 </html>
