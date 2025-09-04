@@ -1859,3 +1859,394 @@ body {
         flex-direction: column;
     }
 }
+
+/* Delete Confirmation Modal Styles */
+.delete-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.delete-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.delete-modal-content {
+    position: relative;
+    background: var(--card);
+    border-radius: calc(var(--radius) * 2);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 400px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out;
+    border: 1px solid var(--border);
+}
+
+.delete-modal-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.delete-modal-header h3 {
+    margin: 0;
+    color: var(--foreground);
+    font-size: 1.125rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.delete-modal-header h3 i {
+    color: #f59e0b;
+    font-size: 1rem;
+}
+
+.delete-modal-close {
+    background: none;
+    border: none;
+    color: var(--muted-foreground);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    line-height: 1;
+}
+
+.delete-modal-close:hover {
+    background: var(--muted);
+    color: var(--foreground);
+}
+
+.delete-modal-body {
+    padding: 1.5rem;
+}
+
+.delete-modal-body p {
+    margin: 0 0 1rem 0;
+    color: var(--foreground);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.warning-text {
+    color: #dc2626 !important;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--muted);
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    border-left: 4px solid #dc2626;
+    margin: 0;
+}
+
+.delete-modal-footer {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.delete-modal-footer .btn {
+    min-width: 100px;
+    justify-content: center;
+}
+
+/* Responsive adjustments for delete modal */
+@media (max-width: 768px) {
+    .delete-modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .delete-modal-header,
+    .delete-modal-body,
+    .delete-modal-footer {
+        padding: 1rem;
+    }
+    
+    .delete-modal-footer {
+        flex-direction: column;
+    }
+    
+    .delete-modal-footer .btn {
+         width: 100%;
+     }
+}
+
+/* Masterlist Number Input Container */
+.masterlist-input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background-color: var(--card);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.masterlist-input-container:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px hsl(82, 25%, 18%, 0.1);
+}
+
+.masterlist-prefix {
+    background-color: var(--muted);
+    padding: 0.75rem 1rem;
+    border-right: 1px solid var(--border);
+    font-weight: 600;
+    color: var(--foreground);
+    white-space: nowrap;
+}
+
+.masterlist-input-container input {
+    border: none !important;
+    box-shadow: none !important;
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    background: transparent;
+    color: var(--foreground);
+}
+
+.masterlist-input-container input:focus {
+    outline: none;
+}
+
+/* Masterlist Number Validation Styles */
+.masterlist-validation-status {
+    margin-top: 0.5rem;
+}
+
+.validation-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.validation-message.success {
+    background: var(--success-background, #f0f9ff);
+    color: var(--success-color, #059669);
+    border: 1px solid var(--success-border, #a7f3d0);
+}
+
+.validation-message.error {
+    background: var(--danger-background, #fee);
+    color: var(--danger-color, #dc2626);
+    border: 1px solid var(--danger-border, #fecaca);
+}
+
+.masterlist-input-container.input-valid {
+    border-color: var(--success-color, #059669) !important;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1) !important;
+}
+
+.masterlist-input-container.input-invalid {
+    border-color: var(--danger-color, #dc2626) !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+.input-valid:focus,
+.input-invalid:focus {
+    outline: none;
+}
+
+/* Success and danger color variables for consistency */
+:root {
+    --success-color: #059669;
+    --success-background: #f0f9ff;
+    --success-border: #a7f3d0;
+    --danger-color: #dc2626;
+    --danger-background: #fee;
+    --danger-border: #fecaca;
+}
+
+/* Image Modal Styles */
+.image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.image-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+.image-modal-content {
+    position: relative;
+    background-color: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out;
+}
+
+.image-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+}
+
+.image-modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.image-modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--card);
+}
+
+.image-modal-header h3 {
+    color: var(--foreground);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.image-modal-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background-color: var(--muted);
+    min-height: 400px;
+}
+
+.image-modal-body img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: var(--radius);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.image-modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    background-color: var(--card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.image-modal-info {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+.image-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Modal Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .image-modal-content {
+        max-width: 95vw;
+        max-height: 95vh;
+        margin: 1rem;
+    }
+    
+    .image-modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .image-modal-actions {
+        justify-content: center;
+    }
+    
+    .image-modal-body {
+        min-height: 300px;
+    }
+    
+    .image-modal-body img {
+        max-height: 60vh;
+    }
+}

@@ -9,6 +9,7 @@ class ICharacterRepository {
     async addCharacter(character) { throw new Error('Method not implemented'); }
     async updateCharacter(id, character) { throw new Error('Method not implemented'); }
     async deleteCharacter(id) { throw new Error('Method not implemented'); }
+    async getCharacterCount() { throw new Error('Method not implemented'); }
     generateMasterlistNumber() { throw new Error('Method not implemented'); }
 }
 
@@ -140,6 +141,26 @@ class FirebaseCharacterRepository extends ICharacterRepository {
     }
 
     /**
+     * Get total count of characters
+     * @returns {Promise<number>} Total character count
+     */
+    async getCharacterCount() {
+        try {
+            const { get } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+            const snapshot = await get(this.charactersRef);
+            
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                return Object.keys(data).length;
+            }
+            return 0;
+        } catch (error) {
+            console.error('Error fetching character count:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Generate next masterlist number
      * @returns {Promise<string>} Next masterlist number
      */
@@ -236,6 +257,10 @@ class LocalStorageCharacterRepository extends ICharacterRepository {
     async deleteCharacter(id) {
         this.characters = this.characters.filter(char => char.id !== id);
         return this.saveCharacters();
+    }
+
+    async getCharacterCount() {
+        return this.characters.length;
     }
 
     generateMasterlistNumber() {

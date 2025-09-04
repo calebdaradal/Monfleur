@@ -6,6 +6,10 @@
     <title>User Management - Character Management Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Page Guard - Must be loaded first for maintenance mode protection -->
+    <script src="common/page-guard.js"></script>
+    
     <style>
         /* User Management Specific Styles */
         .user-management-container {
@@ -686,7 +690,7 @@
     <div id="deleteModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-exclamation-triangle"></i>Confirm Deletion</h3>
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h3>
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">

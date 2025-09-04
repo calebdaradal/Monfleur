@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .activity-list {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-main {
+            flex: 1;
+        }
+        .activity-action {
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+        .activity-meta {
+            font-size: 12px;
+            color: #666;
+        }
+        .activity-user {
+            margin-right: 10px;
+        }
+        .activity-badge {
+            background: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+        .activity-time {
+            font-size: 12px;
+            color: #999;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Dashboard Recent Activities Test</h1>
+        
+        <div>
+            <button id="testDashboard">Test Dashboard Load</button>
+            <button id="testLoggingService">Test LoggingService Directly</button>
+            <button id="clearConsole">Clear Console</button>
+        </div>
+        
+        <h3>Console Output:</h3>
+        <div class="console-output" id="consoleOutput"></div>
+        
+        <h3>Activity List (Simulated Dashboard):</h3>
+        <div class="activity-list">
+            <div class="activity-item">
+                <div class="activity-main">
+                    <p class="activity-action">Loading recent activities...</p>
+                    <div class="activity-meta">
+                        <span class="activity-user">System</span>
+                    </div>
+                </div>
+                <span class="activity-time">-</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import LoggingService from './services/logging-service.js';
+        import AuthenticationService from './services/authentication-service.js';
+
+        class DashboardTester {
+            constructor() {
+                this.consoleOutput = document.getElementById('consoleOutput');
+                this.authService = new AuthenticationService();
+                this.setupEventListeners();
+            }
+
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const colors = {
+                    info: '#17a2b8',
+                    success: '#28a745',
+                    error: '#dc3545',
+                    warning: '#ffc107'
+                };
+                
+                const logEntry = `[${timestamp}] ${message}\n`;
+                const coloredEntry = `<span style="color: ${colors[type]}">${logEntry}</span>`;
+                this.consoleOutput.innerHTML += coloredEntry;
+                this.consoleOutput.scrollTop = this.consoleOutput.scrollHeight;
+                
+                console.log(`[TEST] ${message}`);
+            }
+
+            setupEventListeners() {
+                document.getElementById('testDashboard').addEventListener('click', () => this.testDashboardLoad());
+                document.getElementById('testLoggingService').addEventListener('click', () => this.testLoggingServiceDirectly());
+                document.getElementById('clearConsole').addEventListener('click', () => this.clearConsole());
+            }
+
+            clearConsole() {
+                this.consoleOutput.innerHTML = '';
+            }
+
+            async testDashboardLoad() {
+                try {
+                    this.log('🏠 Testing Dashboard Load Process...', 'info');
+                    
+                    // Step 1: Test Authentication
+                    this.log('🔐 Step 1: Testing Authentication...', 'info');
+                    await this.authService.initialize();
+                    
+                    const currentUser = sessionStorage.getItem('currentUser');
+                    const adminEmail = sessionStorage.getItem('adminEmail');
+                    
+                    if (currentUser || adminEmail) {
+                        this.log(`✅ Authentication found: ${currentUser || adminEmail}`, 'success');
+                    } else {
+                        this.log('⚠️ No authentication found', 'warning');
+                    }
+                    
+                    // Step 2: Test LoggingService
+                    this.log('📝 Step 2: Testing LoggingService...', 'info');
+                    this.log(`🔍 LoggingService initialized: ${LoggingService.isInitialized}`, 'info');
+                    
+                    if (!LoggingService.isInitialized) {
+                        this.log('🔧 Initializing LoggingService...', 'info');
+                        const initialized = await LoggingService.initialize();
+                        this.log(`🔧 LoggingService initialization result: ${initialized}`, initialized ? 'success' : 'error');
+                        
+                        if (!initialized) {
+                            this.log('❌ LoggingService initialization failed - stopping test', 'error');
+                            return;
+                        }
+                    }
+                    
+                    // Step 3: Test Database Query
+                    this.log('📡 Step 3: Testing Database Query...', 'info');
+                    const recentLogs = await LoggingService.getLogs({
+                        limit: 4,
+                        sortBy: 'timestamp',
+                        sortOrder: 'desc'
+                    });
+                    
+                    this.log(`📋 Retrieved ${recentLogs ? recentLogs.length : 0} logs`, 'info');
+                    
+                    if (recentLogs && recentLogs.length > 0) {
+                        this.log('📋 Sample log:', 'info');
+                        this.log(JSON.stringify(recentLogs[0], null, 2), 'info');
+                        
+                        // Step 4: Test HTML Update
+                        this.log('🔄 Step 4: Testing HTML Update...', 'info');
+                        this.updateActivityList(recentLogs);
+                        this.log('✅ Dashboard test completed successfully!', 'success');
+                    } else {
+                        this.log('⚠️ No logs found in database', 'warning');
+                        this.updateActivityList([]);
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ Dashboard test error: ${error.message}`, 'error');
+                    this.log(`❌ Error stack: ${error.stack}`, 'error');
+                }
+            }
+
+            async testLoggingServiceDirectly() {
+                try {
+                    this.log('📝 Testing LoggingService Directly...', 'info');
+                    
+                    // Test initialization
+                    this.log(`🔍 Current state - isInitialized: ${LoggingService.isInitialized}`, 'info');
+                    
+                    if (!LoggingService.isInitialized) {
+                        this.log('🔧 Initializing...', 'info');
+                        const result = await LoggingService.initialize();
+                        this.log(`🔧 Initialization result: ${result}`, result ? 'success' : 'error');
+                    }
+                    
+                    // Test basic functionality
+                    this.log('📊 Testing getLogs method...', 'info');
+                    const logs = await LoggingService.getLogs({ limit: 1 });
+                    this.log(`📋 Got ${logs ? logs.length : 0} logs`, 'info');
+                    
+                    if (logs && logs.length > 0) {
+                        this.log('📋 First log structure:', 'info');
+                        this.log(JSON.stringify(logs[0], null, 2), 'info');
+                    }
+                    
+                    this.log('✅ LoggingService direct test completed!', 'success');
+                    
+                } catch (error) {
+                    this.log(`❌ LoggingService direct test error: ${error.message}`, 'error');
+                    this.log(`❌ Error stack: ${error.stack}`, 'error');
+                }
+            }
+
+            updateActivityList(activities) {
+                const activityList = document.querySelector('.activity-list');
+                if (!activityList) {
+                    this.log('❌ Activity list container not found', 'error');
+                    return;
+                }
+                
+                this.log('🔄 Updating activity list...', 'info');
+                
+                if (!activities || activities.length === 0) {
+                    activityList.innerHTML = `
+                        <div class="activity-item">
+                            <div class="activity-main">
+                                <p class="activity-action">No recent activities</p>
+                                <div class="activity-meta">
+                                    <span class="activity-user">System</span>
+                                </div>
+                            </div>
+                            <span class="activity-time">-</span>
+                        </div>
+                    `;
+                    this.log('📋 Displayed "No recent activities" message', 'info');
+                    return;
+                }
+                
+                const activitiesHTML = activities.map(activity => {
+                    const actionType = activity.type || activity.actionType;
+                    const userDisplay = activity.user || activity.username || 'Unknown User';
+                    const timeAgo = this.formatTimeAgo(activity.timestamp);
+                    const actionText = this.formatActivityAction(actionType, activity.masterlistNumber);
+                    
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-main">
+                                <p class="activity-action">${actionText}</p>
+                                <div class="activity-meta">
+                                    <span class="activity-user">by ${userDisplay}</span>
+                                    ${activity.masterlistNumber ? `<span class="activity-badge">${activity.masterlistNumber}</span>` : ''}
+                                </div>
+                            </div>
+                            <span class="activity-time">${timeAgo}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                activityList.innerHTML = activitiesHTML;
+                this.log(`✅ Updated activity list with ${activities.length} activities`, 'success');
+            }
+
+            formatActivityAction(actionType, masterlistNumber) {
+                const actionMap = {
+                    'UPLOAD': 'New character uploaded',
+                    'EDIT': 'Character updated',
+                    'DELETE': 'Character deleted',
+                    'APPROVE': 'Character approved',
+                    'REJECT': 'Character rejected'
+                };
+                return actionMap[actionType] || `${actionType} action performed`;
+            }
+
+            formatTimeAgo(timestamp) {
+                try {
+                    const now = Date.now();
+                    const activityTime = typeof timestamp === 'string' ? new Date(timestamp).getTime() : timestamp;
+                    const diffMs = now - activityTime;
+                    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                    
+                    if (diffMinutes < 1) return 'Just now';
+                    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+                    
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+                    
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+                } catch (error) {
+                    return 'Unknown time';
+                }
+            }
+        }
+
+        // Initialize tester
+        new DashboardTester();
+    </script>
+</body>
+</html>

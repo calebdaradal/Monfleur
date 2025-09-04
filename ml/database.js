@@ -4,6 +4,9 @@
  * Follows SOLID principles for maintainability and extensibility
  */
 
+// Import toast notification system
+import toastManager from './components/toast.js';
+
 // Character storage manager - Single Responsibility Principle
 class CharacterStorageManager {
     constructor() {
@@ -570,7 +573,7 @@ class CharacterDatabaseApp {
     }
 
     /**
-     * View character details
+     * View character image in full resolution popup
      * @param {string} id - Character ID
      */
     viewCharacter(id) {
@@ -582,11 +585,66 @@ class CharacterDatabaseApp {
         
         const character = this.filterManager.allCharacters.find(char => char.id === id);
         if (character) {
-            // Open character detail modal or navigate to detail page
-            console.log('Viewing character:', character);
-            alert(`Viewing ${character.masterlistNumber} - This would open a detailed view modal`);
+            this.openImageModal(character);
         } else {
             alert('Character not found. Please refresh the page and try again.');
+        }
+    }
+
+    /**
+     * Open image modal with character details
+     * @param {Object} character - Character object
+     */
+    openImageModal(character) {
+        const modal = document.getElementById('imageModal');
+        const modalTitle = document.getElementById('modalCharacterTitle');
+        const modalImage = document.getElementById('modalCharacterImage');
+        const modalInfo = document.getElementById('modalCharacterInfo');
+        
+        if (!modal || !modalTitle || !modalImage || !modalInfo) {
+            console.error('Modal elements not found');
+            return;
+        }
+        
+        // Set modal content
+        modalTitle.textContent = `${character.masterlistNumber} - Character Image`;
+        modalInfo.textContent = `Owner: ${character.owner} | Artist: ${character.artist} | Rarity: ${character.rarity}`;
+        
+        // Convert Google Drive URL to direct image URL
+        const imageUrl = GoogleDriveImageHandler.convertToDirectUrl(character.imageUrl);
+        modalImage.src = imageUrl;
+        modalImage.alt = `${character.masterlistNumber} - ${character.owner}`;
+        
+        // Store current character data for modal actions
+        window.currentModalCharacter = character;
+        window.currentModalImageUrl = imageUrl;
+        
+        // Show modal
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Add escape key listener
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                this.closeImageModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    }
+
+    /**
+     * Close image modal
+     */
+    closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
+            
+            // Clear stored data
+            window.currentModalCharacter = null;
+            window.currentModalImageUrl = null;
         }
     }
 
@@ -621,24 +679,95 @@ class CharacterDatabaseApp {
         }
         
         const character = this.filterManager.allCharacters.find(char => char.id === id);
-        if (character && confirm(`Are you sure you want to delete ${character.masterlistNumber}?`)) {
-            try {
-                await this.storageManager.deleteCharacter(id);
-                
-                // Reload characters from Firebase
-                const characters = await this.storageManager.getAllCharacters();
-                this.filterManager.updateCharacters(characters);
-                
-                this.renderCharacters();
-                this.updateResultsCount();
-                
-                this.showConnectionStatus(true, `Character ${character.masterlistNumber} deleted successfully`);
-            } catch (error) {
-                console.error('Error deleting character:', error);
-                alert('Failed to delete character. Please try again.');
-            }
-        } else if (!character) {
+        if (character) {
+            this.openDeleteModal(character);
+        } else {
             alert('Character not found. Please refresh the page and try again.');
+        }
+    }
+
+    /**
+     * Open delete confirmation modal
+     * @param {Object} character - Character object
+     */
+    openDeleteModal(character) {
+        const modal = document.getElementById('deleteModal');
+        
+        if (!modal) {
+            console.error('Delete modal not found');
+            return;
+        }
+        
+        // Store character data for deletion
+        window.currentDeleteCharacter = character;
+        
+        // Show modal
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Add escape key listener
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                this.closeDeleteModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    }
+
+    /**
+     * Close delete confirmation modal
+     */
+    closeDeleteModal() {
+        const modal = document.getElementById('deleteModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
+            
+            // Clear stored data
+            window.currentDeleteCharacter = null;
+        }
+    }
+
+    /**
+     * Confirm character deletion
+     */
+    async confirmDelete() {
+        const character = window.currentDeleteCharacter;
+        if (!character) {
+            console.error('No character selected for deletion');
+            return;
+        }
+        
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const originalText = confirmBtn.innerHTML;
+        
+        try {
+            // Show loading state
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+            confirmBtn.disabled = true;
+            
+            await this.storageManager.deleteCharacter(character.id);
+            
+            // Reload characters from Firebase
+            const characters = await this.storageManager.getAllCharacters();
+            this.filterManager.updateCharacters(characters);
+            
+            this.renderCharacters();
+            this.updateResultsCount();
+            
+            toastManager.showSuccess(`Character ${character.masterlistNumber} deleted successfully`);
+            
+            // Close modal
+            this.closeDeleteModal();
+            
+        } catch (error) {
+            console.error('Error deleting character:', error);
+            toastManager.showError('Failed to delete character. Please try again.');
+        } finally {
+            // Restore button state
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
         }
     }
 
@@ -672,6 +801,38 @@ const app = new CharacterDatabaseApp();
 
 // Make app globally available for onclick handlers
 window.app = app;
+
+// Global modal control functions for HTML onclick handlers
+window.closeImageModal = function() {
+    app.closeImageModal();
+};
+
+window.downloadImage = function() {
+    if (window.currentModalImageUrl && window.currentModalCharacter) {
+        const link = document.createElement('a');
+        link.href = window.currentModalImageUrl;
+        link.download = `${window.currentModalCharacter.masterlistNumber}_${window.currentModalCharacter.owner}.jpg`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
+
+window.openImageInNewTab = function() {
+    if (window.currentModalImageUrl) {
+        window.open(window.currentModalImageUrl, '_blank');
+    }
+};
+
+// Global delete modal control functions for HTML onclick handlers
+window.closeDeleteModal = function() {
+    app.closeDeleteModal();
+};
+
+window.confirmDelete = function() {
+    app.confirmDelete();
+};
 
 // Export for use in other modules
 export {

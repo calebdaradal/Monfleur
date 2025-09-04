@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Console - Recent Activities</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .debug-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-panel h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: black;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .log-output {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success {
+            background-color: #28a745;
+        }
+        .status-error {
+            background-color: #dc3545;
+        }
+        .status-warning {
+            background-color: #ffc107;
+        }
+        .status-info {
+            background-color: #17a2b8;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .info-card h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        .info-card p {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+        .clear-btn {
+            float: right;
+            background: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔍 Debug Console - Recent Activities System</h1>
+        
+        <div class="debug-panel">
+            <h2>System Status</h2>
+            <div class="info-grid" id="statusGrid">
+                <div class="info-card">
+                    <h4><span class="status-indicator status-info" id="firebaseStatus"></span>Firebase Connection</h4>
+                    <p id="firebaseInfo">Checking...</p>
+                </div>
+                <div class="info-card">
+                    <h4><span class="status-indicator status-info" id="loggingStatus"></span>Logging Service</h4>
+                    <p id="loggingInfo">Checking...</p>
+                </div>
+                <div class="info-card">
+                    <h4><span class="status-indicator status-info" id="authStatus"></span>Authentication</h4>
+                    <p id="authInfo">Checking...</p>
+                </div>
+                <div class="info-card">
+                    <h4><span class="status-indicator status-info" id="dataStatus"></span>Database Data</h4>
+                    <p id="dataInfo">Checking...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="debug-panel">
+            <h2>Debug Actions</h2>
+            <div class="button-group">
+                <button class="btn-primary" id="testConnection">Test Firebase Connection</button>
+                <button class="btn-success" id="testLoggingService">Test Logging Service</button>
+                <button class="btn-warning" id="simulateDashboard">Simulate Dashboard Load</button>
+                <button class="btn-primary" id="checkDatabase">Check Database Structure</button>
+                <button class="btn-success" id="addTestData">Add Test Data</button>
+                <button class="btn-danger" id="fullDiagnostic">Full Diagnostic</button>
+            </div>
+        </div>
+
+        <div class="debug-panel">
+            <h2>Console Output
+                <button class="clear-btn" id="clearConsole">Clear</button>
+            </h2>
+            <div class="log-output" id="consoleOutput"></div>
+        </div>
+
+        <div class="debug-panel">
+            <h2>Recent Activities Test</h2>
+            <div id="activityTestOutput"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import LoggingService from './services/logging-service.js';
+        import AuthenticationService from './services/authentication-service.js';
+        import firebaseConfig from './config/firebase-config.js';
+
+        class DebugConsole {
+            constructor() {
+                this.consoleOutput = document.getElementById('consoleOutput');
+                this.authService = new AuthenticationService();
+                this.setupEventListeners();
+                this.startStatusMonitoring();
+            }
+
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const colors = {
+                    info: '#17a2b8',
+                    success: '#28a745',
+                    error: '#dc3545',
+                    warning: '#ffc107'
+                };
+                
+                const logEntry = `[${timestamp}] ${message}\n`;
+                const coloredEntry = `<span style="color: ${colors[type]}">${logEntry}</span>`;
+                this.consoleOutput.innerHTML += coloredEntry;
+                this.consoleOutput.scrollTop = this.consoleOutput.scrollHeight;
+                
+                // Also log to browser console
+                console.log(`[DEBUG] ${message}`);
+            }
+
+            updateStatus(elementId, status, message) {
+                const indicator = document.getElementById(elementId);
+                const info = document.getElementById(elementId.replace('Status', 'Info'));
+                
+                indicator.className = `status-indicator status-${status}`;
+                info.textContent = message;
+            }
+
+            setupEventListeners() {
+                document.getElementById('testConnection').addEventListener('click', () => this.testFirebaseConnection());
+                document.getElementById('testLoggingService').addEventListener('click', () => this.testLoggingService());
+                document.getElementById('simulateDashboard').addEventListener('click', () => this.simulateDashboardLoad());
+                document.getElementById('checkDatabase').addEventListener('click', () => this.checkDatabaseStructure());
+                document.getElementById('addTestData').addEventListener('click', () => this.addTestData());
+                document.getElementById('fullDiagnostic').addEventListener('click', () => this.runFullDiagnostic());
+                document.getElementById('clearConsole').addEventListener('click', () => this.clearConsole());
+            }
+
+            clearConsole() {
+                this.consoleOutput.innerHTML = '';
+            }
+
+            async startStatusMonitoring() {
+                this.log('🚀 Starting debug console...', 'info');
+                await this.checkAllSystems();
+            }
+
+            async checkAllSystems() {
+                await this.testFirebaseConnection();
+                await this.testLoggingService();
+                await this.checkAuthentication();
+                await this.checkDatabaseStructure();
+            }
+
+            async testFirebaseConnection() {
+                try {
+                    this.log('🔥 Testing Firebase connection...', 'info');
+                    
+                    const initialized = await firebaseConfig.initialize();
+                    if (initialized) {
+                        this.updateStatus('firebaseStatus', 'success', 'Connected');
+                        this.log('✅ Firebase connection successful', 'success');
+                        return true;
+                    } else {
+                        this.updateStatus('firebaseStatus', 'error', 'Failed to initialize');
+                        this.log('❌ Firebase initialization failed', 'error');
+                        return false;
+                    }
+                } catch (error) {
+                    this.updateStatus('firebaseStatus', 'error', `Error: ${error.message}`);
+                    this.log(`❌ Firebase connection error: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            async testLoggingService() {
+                try {
+                    this.log('📝 Testing Logging Service...', 'info');
+                    
+                    this.log(`🔍 LoggingService initialized: ${LoggingService.isInitialized}`, 'info');
+                    
+                    if (!LoggingService.isInitialized) {
+                        this.log('🔧 Initializing LoggingService...', 'info');
+                        const initialized = await LoggingService.initialize();
+                        this.log(`🔧 LoggingService initialization result: ${initialized}`, initialized ? 'success' : 'error');
+                        
+                        if (!initialized) {
+                            this.updateStatus('loggingStatus', 'error', 'Initialization failed');
+                            return false;
+                        }
+                    }
+                    
+                    this.updateStatus('loggingStatus', 'success', 'Initialized and ready');
+                    this.log('✅ LoggingService is working', 'success');
+                    return true;
+                } catch (error) {
+                    this.updateStatus('loggingStatus', 'error', `Error: ${error.message}`);
+                    this.log(`❌ LoggingService error: ${error.message}`, 'error');
+                    this.log(`❌ Error stack: ${error.stack}`, 'error');
+                    return false;
+                }
+            }
+
+            async checkAuthentication() {
+                try {
+                    this.log('🔐 Checking authentication...', 'info');
+                    
+                    const currentUser = sessionStorage.getItem('currentUser');
+                    const adminEmail = sessionStorage.getItem('adminEmail');
+                    
+                    if (currentUser || adminEmail) {
+                        this.updateStatus('authStatus', 'success', `Logged in as ${currentUser || adminEmail}`);
+                        this.log(`✅ User authenticated: ${currentUser || adminEmail}`, 'success');
+                        return true;
+                    } else {
+                        this.updateStatus('authStatus', 'warning', 'No user session found');
+                        this.log('⚠️ No authentication found in session storage', 'warning');
+                        return false;
+                    }
+                } catch (error) {
+                    this.updateStatus('authStatus', 'error', `Error: ${error.message}`);
+                    this.log(`❌ Authentication check error: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            async checkDatabaseStructure() {
+                try {
+                    this.log('🗄️ Checking database structure...', 'info');
+                    
+                    if (!LoggingService.isInitialized) {
+                        await LoggingService.initialize();
+                    }
+                    
+                    const logs = await LoggingService.getLogs({ limit: 1 });
+                    
+                    if (logs && logs.length > 0) {
+                        this.updateStatus('dataStatus', 'success', `Found ${logs.length} log(s)`);
+                        this.log(`✅ Database has data. Sample log structure:`, 'success');
+                        this.log(JSON.stringify(logs[0], null, 2), 'info');
+                        return true;
+                    } else {
+                        this.updateStatus('dataStatus', 'warning', 'No logs found');
+                        this.log('⚠️ No logs found in database', 'warning');
+                        return false;
+                    }
+                } catch (error) {
+                    this.updateStatus('dataStatus', 'error', `Error: ${error.message}`);
+                    this.log(`❌ Database check error: ${error.message}`, 'error');
+                    this.log(`❌ Error stack: ${error.stack}`, 'error');
+                    return false;
+                }
+            }
+
+            async simulateDashboardLoad() {
+                try {
+                    this.log('🏠 Simulating dashboard recent activities load...', 'info');
+                    
+                    // Simulate the exact same process as dashboard.js
+                    this.log('📊 Loading recent activities...', 'info');
+                    
+                    if (!LoggingService.isInitialized) {
+                        this.log('🔧 Initializing logging service...', 'info');
+                        const initialized = await LoggingService.initialize();
+                        this.log(`🔧 Logging service initialization: ${initialized}`, initialized ? 'success' : 'error');
+                    }
+                    
+                    this.log('📡 Fetching logs from database...', 'info');
+                    const recentLogs = await LoggingService.getLogs({
+                        limit: 4,
+                        sortBy: 'timestamp',
+                        sortOrder: 'desc'
+                    });
+                    
+                    this.log(`📋 Retrieved ${recentLogs ? recentLogs.length : 0} logs`, 'info');
+                    
+                    if (recentLogs && recentLogs.length > 0) {
+                        this.log('✅ Dashboard simulation successful!', 'success');
+                        this.log('📋 Retrieved logs:', 'info');
+                        recentLogs.forEach((log, index) => {
+                            this.log(`  ${index + 1}. ${log.type || log.actionType} by ${log.user || log.username} - ${log.masterlistNumber}`, 'info');
+                        });
+                        
+                        // Display in activity test output
+                        this.displayActivityTest(recentLogs);
+                    } else {
+                        this.log('⚠️ No recent activities found', 'warning');
+                        document.getElementById('activityTestOutput').innerHTML = '<p>No recent activities to display</p>';
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ Dashboard simulation error: ${error.message}`, 'error');
+                    this.log(`❌ Error stack: ${error.stack}`, 'error');
+                }
+            }
+
+            displayActivityTest(activities) {
+                const output = document.getElementById('activityTestOutput');
+                
+                if (!activities || activities.length === 0) {
+                    output.innerHTML = '<p>No activities to display</p>';
+                    return;
+                }
+                
+                const activitiesHTML = activities.map(activity => {
+                    const actionType = activity.type || activity.actionType;
+                    const userDisplay = activity.user || activity.username || 'Unknown User';
+                    const timeAgo = this.formatTimeAgo(activity.timestamp);
+                    
+                    return `
+                        <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 5px;">
+                            <strong>${this.formatActivityAction(actionType)}</strong><br>
+                            <small>by ${userDisplay} • ${activity.masterlistNumber || 'No ML#'} • ${timeAgo}</small>
+                        </div>
+                    `;
+                }).join('');
+                
+                output.innerHTML = `<h4>Simulated Recent Activities:</h4>${activitiesHTML}`;
+            }
+
+            formatActivityAction(actionType) {
+                const actionMap = {
+                    'UPLOAD': 'New character uploaded',
+                    'EDIT': 'Character updated',
+                    'DELETE': 'Character deleted',
+                    'APPROVE': 'Character approved',
+                    'REJECT': 'Character rejected'
+                };
+                return actionMap[actionType] || `${actionType} action performed`;
+            }
+
+            formatTimeAgo(timestamp) {
+                try {
+                    const now = Date.now();
+                    const activityTime = typeof timestamp === 'string' ? new Date(timestamp).getTime() : timestamp;
+                    const diffMs = now - activityTime;
+                    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                    
+                    if (diffMinutes < 1) return 'Just now';
+                    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+                    
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+                    
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+                } catch (error) {
+                    return 'Unknown time';
+                }
+            }
+
+            async addTestData() {
+                try {
+                    this.log('➕ Adding test data...', 'info');
+                    
+                    if (!LoggingService.isInitialized) {
+                        await LoggingService.initialize();
+                    }
+                    
+                    const testLogs = [
+                        { type: 'UPLOAD', user: 'DebugUser1', masterlist: 'ML-DEBUG-001' },
+                        { type: 'EDIT', user: 'DebugUser2', masterlist: 'ML-DEBUG-002' },
+                        { type: 'DELETE', user: 'DebugUser3', masterlist: 'ML-DEBUG-003' }
+                    ];
+                    
+                    let successCount = 0;
+                    for (const log of testLogs) {
+                        const success = await LoggingService.logCharacterActivity(
+                            log.type,
+                            log.user,
+                            log.masterlist,
+                            { description: `Debug test log - ${log.type}` }
+                        );
+                        if (success) {
+                            successCount++;
+                            this.log(`✅ Added ${log.type} log for ${log.user}`, 'success');
+                        } else {
+                            this.log(`❌ Failed to add ${log.type} log for ${log.user}`, 'error');
+                        }
+                    }
+                    
+                    this.log(`📊 Added ${successCount}/${testLogs.length} test logs`, successCount > 0 ? 'success' : 'error');
+                    
+                    // Refresh database status
+                    await this.checkDatabaseStructure();
+                    
+                } catch (error) {
+                    this.log(`❌ Error adding test data: ${error.message}`, 'error');
+                }
+            }
+
+            async runFullDiagnostic() {
+                this.log('🔍 Running full diagnostic...', 'info');
+                this.log('=' .repeat(50), 'info');
+                
+                await this.checkAllSystems();
+                await this.simulateDashboardLoad();
+                
+                this.log('=' .repeat(50), 'info');
+                this.log('🏁 Full diagnostic complete!', 'success');
+            }
+        }
+
+        // Initialize debug console
+        new DebugConsole();
+    </script>
+</body>
+</html>

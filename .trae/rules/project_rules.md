@@ -1,0 +1,1 @@
+1. Stop creating demo or test files as they unnecessarily inflate our project

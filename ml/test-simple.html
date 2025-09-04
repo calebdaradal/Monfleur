@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Module Test</title>
+</head>
+<body>
+    <h1>Simple Module Test</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            console.log(message);
+            output.innerHTML += `<p>${message}</p>`;
+        }
+        
+        log('Starting module test...');
+        
+        try {
+            log('Testing LoggingService import...');
+            const LoggingService = await import('./services/logging-service.js');
+            log('✅ LoggingService imported successfully');
+            log(`LoggingService default: ${LoggingService.default}`);
+            
+            const loggingInstance = new LoggingService.default();
+            log(`✅ LoggingService instance created: ${loggingInstance}`);
+            log(`isInitialized: ${loggingInstance.isInitialized}`);
+            
+        } catch (error) {
+            log(`❌ Error importing LoggingService: ${error.message}`);
+            log(`❌ Error stack: ${error.stack}`);
+        }
+        
+        try {
+            log('Testing AuthenticationService import...');
+            const AuthenticationService = await import('./services/authentication-service.js');
+            log('✅ AuthenticationService imported successfully');
+            
+        } catch (error) {
+            log(`❌ Error importing AuthenticationService: ${error.message}`);
+        }
+    </script>
+</body>
+</html>

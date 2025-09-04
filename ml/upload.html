@@ -6,6 +6,9 @@
     <title>Upload Character - Character Management Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Page Guard - Must be loaded first for maintenance mode protection -->
+    <script src="common/page-guard.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -57,7 +60,10 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="masterlistNumber">Masterlist Number *</label>
-                                                    <input type="text" id="masterlistNumber" name="masterlistNumber" placeholder="ML-XXX" required>
+                                                    <div class="masterlist-input-container">
+                                                        <span class="masterlist-prefix">ML-</span>
+                                                        <input type="text" id="masterlistNumber" name="masterlistNumber" placeholder="123" pattern="[0-9]+" inputmode="numeric" required>
+                                                    </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="primaryBiome">Primary Biome *</label>

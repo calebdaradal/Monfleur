@@ -13,10 +13,11 @@
 import EnhancedCharacterStorageManager from './services/storage-manager.js';
 // Import GoogleDriveImageHandler for image processing
 import { GoogleDriveImageHandler } from './database.js';
+// Import toast notification system
+import toastManager from './components/toast.js';
 
 // Global variables
 let storageManager;
-let imagePreview;
 
 /**
  * Debounce function to limit function calls
@@ -172,6 +173,16 @@ async function handleFormSubmit(event) {
     const formData = new FormData(event.target);
     const characterData = extractCharacterData(formData);
     
+    // Validate masterlist number format (digits only)
+    const masterlistDigits = characterData.masterlistNumber;
+    if (!validateMasterlistNumber(masterlistDigits)) {
+        toastManager.showError('Please enter a valid masterlist number (digits only, e.g., 123)');
+        return;
+    }
+    
+    // Convert to full masterlist number for storage
+    characterData.masterlistNumber = getFullMasterlistNumber(masterlistDigits);
+    
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
@@ -189,14 +200,32 @@ async function handleFormSubmit(event) {
         }
         
         if (success) {
-            showSuccessMessage(editId ? 'Character updated successfully!' : 'Character created successfully!');
-            if (!editId) {
-                resetForm();
+            // Show toast notification for successful operation
+            toastManager.showSuccess(editId ? 'Character updated successfully!' : 'Character uploaded successfully!');
+            resetForm();
+            
+            // Clear edit mode from URL after successful update
+            if (editId) {
+                const url = new URL(window.location);
+                url.searchParams.delete('edit');
+                window.history.replaceState({}, '', url);
+                
+                // Update page title back to default
+                const pageTitle = document.querySelector('h1');
+                if (pageTitle) {
+                    pageTitle.textContent = 'Upload Character';
+                }
+                
+                // Update submit button text back to default
+                const submitBtn = document.querySelector('.character-form button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Character';
+                }
             }
         }
     } catch (error) {
         console.error('Error saving character:', error);
-        showErrorMessage(error.message);
+        toastManager.showError(error.message);
     } finally {
         // Restore button state
         submitBtn.innerHTML = originalText;
@@ -243,6 +272,13 @@ function setupFormHandlers() {
     const generateBtn = document.getElementById('generateMasterlistBtn');
     if (generateBtn) {
         generateBtn.addEventListener('click', generateMasterlistNumber);
+    }
+    
+    // Setup masterlist number validation
+    const masterlistInput = document.getElementById('masterlistNumber');
+    if (masterlistInput) {
+        masterlistInput.addEventListener('input', handleMasterlistNumberChange);
+        masterlistInput.addEventListener('blur', handleMasterlistNumberBlur);
     }
 }
 
@@ -412,7 +448,7 @@ function previewCharacter() {
             </div>
             <div class="character-info">
                 <div class="character-header">
-                    <span class="character-ml">${data.masterlistNumber || 'ML-XXX'}</span>
+                    <span class="character-ml">${data.masterlistNumber ? getFullMasterlistNumber(data.masterlistNumber) : 'ML-XXX'}</span>
                     <span class="character-rarity rarity-${(data.rarity || 'unknown').toLowerCase().replace(' ', '-')}">
                         ${data.rarity || 'Unknown'}
                     </span>
@@ -539,9 +575,13 @@ function loadCharacterForEdit(character) {
     const form = document.querySelector('.character-form');
     if (!form) return;
     
+    // Extract digits from masterlist number (remove ML- prefix)
+    const masterlistDigits = character.masterlistNumber ? 
+        character.masterlistNumber.replace(/^ML-/, '') : '';
+    
     // Populate form fields
     const fields = {
-        masterlistNumber: character.masterlistNumber,
+        masterlistNumber: masterlistDigits, // Store only digits for the input
         owner: character.owner,
         artist: character.artist,
         primaryBiome: character.primaryBiome || character.biome, // Handle legacy data
@@ -574,11 +614,8 @@ function loadCharacterForEdit(character) {
         submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Character';
     }
     
-    // Trigger preview and image preview
+    // Trigger preview
     previewCharacter();
-    if (character.imageUrl) {
-        imagePreview.showPreview(character.imageUrl);
-    }
 }
 
 /**
@@ -589,7 +626,6 @@ function resetForm() {
     if (form) {
         form.reset();
         previewCharacter();
-        imagePreview.showPlaceholder();
         updateImageUrlStatus('', 'neutral');
         
         // Clear any error messages
@@ -600,9 +636,7 @@ function resetForm() {
     }
 }
 
-// Add this after line 100 in the DOMContentLoaded event listener
-console.log('Storage Manager:', storageManager);
-console.log('Firebase enabled:', storageManager.isUsingFirebase());
+// Storage manager debugging (moved to after initialization)
 
 // Test the addCharacter method
 window.testFirebase = async function() {
@@ -620,6 +654,116 @@ window.testFirebase = async function() {
         console.error('Test failed:', error);
     }
 };
+
+/**
+ * Validate masterlist number format
+ * @param {string} digits - Digits only (without ML- prefix)
+ * @returns {boolean} True if valid format
+ */
+function validateMasterlistNumber(digits) {
+    if (!digits || typeof digits !== 'string') {
+        return false;
+    }
+    
+    // Check if it contains only digits and has at least one digit
+    const digitPattern = /^[0-9]+$/;
+    return digitPattern.test(digits.trim());
+}
+
+/**
+ * Get full masterlist number with ML- prefix
+ * @param {string} digits - Digits only
+ * @returns {string} Full masterlist number (ML-XXX)
+ */
+function getFullMasterlistNumber(digits) {
+    return digits ? `ML-${digits}` : '';
+}
+
+/**
+ * Handle masterlist number input changes
+ * @param {Event} event - Input event
+ */
+function handleMasterlistNumberChange(event) {
+    const input = event.target;
+    let value = input.value;
+    
+    // Remove any non-digit characters
+    const digitsOnly = value.replace(/[^0-9]/g, '');
+    
+    // Update input value to digits only
+    if (value !== digitsOnly) {
+        input.value = digitsOnly;
+    }
+    
+    // Update validation status
+    updateMasterlistValidationStatus(input, digitsOnly);
+}
+
+/**
+ * Handle masterlist number input blur (when user leaves the field)
+ * @param {Event} event - Blur event
+ */
+function handleMasterlistNumberBlur(event) {
+    const input = event.target;
+    const digits = input.value.trim();
+    
+    updateMasterlistValidationStatus(input, digits);
+}
+
+/**
+ * Update masterlist number validation status display
+ * @param {HTMLInputElement} input - Input element
+ * @param {string} digits - Digits only
+ */
+function updateMasterlistValidationStatus(input, digits) {
+    const isValid = validateMasterlistNumber(digits);
+    const statusContainer = getOrCreateMasterlistStatusContainer(input);
+    const inputContainer = input.closest('.masterlist-input-container');
+    
+    if (!digits) {
+        // Empty field - show neutral state
+        statusContainer.innerHTML = '';
+        if (inputContainer) {
+            inputContainer.classList.remove('input-valid', 'input-invalid');
+        }
+    } else if (isValid) {
+        // Valid format - just show visual feedback without message
+        statusContainer.innerHTML = '';
+        if (inputContainer) {
+            inputContainer.classList.add('input-valid');
+            inputContainer.classList.remove('input-invalid');
+        }
+    } else {
+        // Invalid format
+        statusContainer.innerHTML = `
+            <div class="validation-message error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Please enter only numbers (e.g., 123)</span>
+            </div>
+        `;
+        if (inputContainer) {
+            inputContainer.classList.add('input-invalid');
+            inputContainer.classList.remove('input-valid');
+        }
+    }
+}
+
+/**
+ * Get or create status container for masterlist number validation
+ * @param {HTMLInputElement} input - Input element
+ * @returns {HTMLElement} Status container element
+ */
+function getOrCreateMasterlistStatusContainer(input) {
+    let statusContainer = input.parentNode.querySelector('.masterlist-validation-status');
+    
+    if (!statusContainer) {
+        statusContainer = document.createElement('div');
+        statusContainer.className = 'masterlist-validation-status';
+        input.parentNode.appendChild(statusContainer);
+    }
+    
+    return statusContainer;
+}
 
 /**
  * Extract character data from form

@@ -1,3 +1,9 @@
+import loggingService from './logging-service.js';
+import AuthenticationService from './authentication-service.js';
+
+// Create authentication service instance
+const authenticationService = new AuthenticationService();
+
 /**
  * Character Service
  * Handles business logic and coordinates between repositories
@@ -38,6 +44,19 @@ class CharacterService {
     }
 
     /**
+     * Get total count of characters
+     * @returns {Promise<number>} Total character count
+     */
+    async getCharacterCount() {
+        try {
+            return await this.repository.getCharacterCount();
+        } catch (error) {
+            console.error('Error in CharacterService.getCharacterCount:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Create new character
      * @param {Object} characterData - Character data
      * @returns {Promise<string>} Character ID
@@ -53,7 +72,27 @@ class CharacterService {
             // Check for duplicate masterlist numbers
             await this.checkDuplicateMasterlistNumber(characterData.masterlistNumber);
 
-            return await this.repository.addCharacter(characterData);
+            const characterId = await this.repository.addCharacter(characterData);
+
+            // Log the character creation activity
+            try {
+                // Ensure authentication service is initialized
+                if (!authenticationService.isInitialized) {
+                    await authenticationService.initialize();
+                }
+                const currentUser = authenticationService.getCurrentUser();
+                const username = currentUser ? (currentUser.username || currentUser.email || 'Unknown User') : 'Unknown User';
+                await loggingService.logCharacterActivity(
+                    'UPLOAD',
+                    username,
+                    characterData.masterlistNumber,
+                    { characterId: characterId }
+                );
+            } catch (logError) {
+                console.warn('⚠️ Failed to log character creation:', logError);
+            }
+
+            return characterId;
         } catch (error) {
             console.error('Error in CharacterService.createCharacter:', error);
             throw error;
@@ -68,6 +107,12 @@ class CharacterService {
      */
     async updateCharacter(id, updates) {
         try {
+            // Get existing character for logging purposes
+            const existingCharacter = await this.repository.getCharacterById(id);
+            if (!existingCharacter) {
+                throw new Error('Character not found');
+            }
+
             // Validate updates
             const validation = this.validateCharacterData(updates, true);
             if (!validation.isValid) {
@@ -79,7 +124,28 @@ class CharacterService {
                 await this.checkDuplicateMasterlistNumber(updates.masterlistNumber, id);
             }
 
-            return await this.repository.updateCharacter(id, updates);
+            const result = await this.repository.updateCharacter(id, updates);
+
+            // Log the character update activity
+            try {
+                // Ensure authentication service is initialized
+                if (!authenticationService.isInitialized) {
+                    await authenticationService.initialize();
+                }
+                const currentUser = authenticationService.getCurrentUser();
+                const username = currentUser ? (currentUser.username || currentUser.email || 'Unknown User') : 'Unknown User';
+                const masterlistNumber = updates.masterlistNumber || existingCharacter.masterlistNumber;
+                await loggingService.logCharacterActivity(
+                    'EDIT',
+                    username,
+                    masterlistNumber,
+                    { characterId: id }
+                );
+            } catch (logError) {
+                console.warn('⚠️ Failed to log character update:', logError);
+            }
+
+            return result;
         } catch (error) {
             console.error('Error in CharacterService.updateCharacter:', error);
             throw error;
@@ -93,7 +159,33 @@ class CharacterService {
      */
     async deleteCharacter(id) {
         try {
-            return await this.repository.deleteCharacter(id);
+            // Get character data for logging before deletion
+            const character = await this.repository.getCharacterById(id);
+            if (!character) {
+                throw new Error('Character not found');
+            }
+
+            const result = await this.repository.deleteCharacter(id);
+
+            // Log the character deletion activity
+            try {
+                // Ensure authentication service is initialized
+                if (!authenticationService.isInitialized) {
+                    await authenticationService.initialize();
+                }
+                const currentUser = authenticationService.getCurrentUser();
+                const username = currentUser ? (currentUser.username || currentUser.email || 'Unknown User') : 'Unknown User';
+                await loggingService.logCharacterActivity(
+                    'DELETE',
+                    username,
+                    character.masterlistNumber,
+                    { characterId: id }
+                );
+            } catch (logError) {
+                console.warn('⚠️ Failed to log character deletion:', logError);
+            }
+
+            return result;
         } catch (error) {
             console.error('Error in CharacterService.deleteCharacter:', error);
             throw error;

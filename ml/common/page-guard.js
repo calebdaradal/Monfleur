@@ -20,20 +20,29 @@ class PageGuard {
      */
     async initialize() {
         try {
+            console.log('🛡️ [DEBUG] === PAGE GUARD INITIALIZATION STARTED ===');
+            console.log('🛡️ [DEBUG] Page:', document.title || 'Unknown');
+            console.log('🛡️ [DEBUG] URL:', window.location.href);
+            
             // Check for all access restrictions
             const accessCheck = this.checkAccessRestriction();
             
+            console.log('🛡️ [DEBUG] Access check result:', accessCheck);
+            
             if (accessCheck.shouldRestrict) {
-                console.warn('⚠️ Page access blocked:', accessCheck.reason);
+                console.warn('⚠️ [DEBUG] Page access BLOCKED:', accessCheck.reason);
+                console.warn('⚠️ [DEBUG] Restriction type:', accessCheck.type);
                 this.handleRestriction(accessCheck);
                 return false;
             }
 
             this.isInitialized = true;
-            console.log('✅ Page Guard initialized successfully - Access allowed');
+            console.log('✅ [DEBUG] Page Guard initialized successfully - Access ALLOWED');
+            console.log('🛡️ [DEBUG] === PAGE GUARD INITIALIZATION COMPLETED ===');
             return true;
         } catch (error) {
-            console.error('❌ Page Guard initialization failed:', error);
+            console.error('❌ [DEBUG] Page Guard initialization FAILED:', error);
+            console.error('❌ [DEBUG] Error stack:', error.stack);
             return false;
         }
     }
@@ -45,6 +54,49 @@ class PageGuard {
     checkFirstTimeRestriction() {
         const isFirstTime = localStorage.getItem('IsThisFirstTime_Log_From_LiveServer');
         return isFirstTime === 'true';
+    }
+
+    /**
+     * Check if maintenance mode is active via URL parameters
+     * @returns {boolean} True if maintenance mode is active
+     */
+    checkMaintenanceMode() {
+        console.log('🔍 [DEBUG] Checking maintenance mode status...');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const maintenanceParam = urlParams.get('maintenance');
+        const storedMaintenance = localStorage.getItem('ml_maintenance_mode');
+        
+        console.log('🔍 [DEBUG] URL maintenance parameter:', maintenanceParam);
+        console.log('🔍 [DEBUG] Stored maintenance status:', storedMaintenance);
+        
+        // Check for maintenance activation
+        if (maintenanceParam === 'enable' || maintenanceParam === 'enabled' || maintenanceParam === 'on' || maintenanceParam === 'true') {
+            localStorage.setItem('ml_maintenance_mode', 'true');
+            console.log('🔧 [DEBUG] Maintenance mode ACTIVATED via URL parameter:', maintenanceParam);
+            console.log('🔧 [DEBUG] localStorage updated: ml_maintenance_mode = true');
+            return true;
+        }
+        
+        // Check for maintenance deactivation
+        if (maintenanceParam === 'disable' || maintenanceParam === 'off' || maintenanceParam === 'false') {
+            localStorage.removeItem('ml_maintenance_mode');
+            console.log('✅ [DEBUG] Maintenance mode DEACTIVATED via URL parameter:', maintenanceParam);
+            console.log('✅ [DEBUG] localStorage cleared: ml_maintenance_mode removed');
+            return false;
+        }
+        
+        // Check stored maintenance mode status
+        const isMaintenanceActive = storedMaintenance === 'true';
+        console.log('🔍 [DEBUG] Final maintenance mode status:', isMaintenanceActive);
+        
+        if (isMaintenanceActive) {
+            console.log('⚠️ [DEBUG] Page access will be BLOCKED due to maintenance mode');
+        } else {
+            console.log('✅ [DEBUG] Maintenance mode check passed - no restrictions');
+        }
+        
+        return isMaintenanceActive;
     }
 
     /**
@@ -65,11 +117,31 @@ class PageGuard {
      * @returns {Object} Restriction check result
      */
     checkAccessRestriction() {
+        console.log('🔍 [DEBUG] === ACCESS RESTRICTION CHECK STARTED ===');
+        console.log('🔍 [DEBUG] Current URL:', window.location.href);
+        
+        const isMaintenanceMode = this.checkMaintenanceMode();
         const isFirstTimeRestricted = this.checkFirstTimeRestriction();
         const isAuthenticated = this.checkUserAuthentication();
         
+        console.log('🔍 [DEBUG] Restriction check results:');
+        console.log('🔍 [DEBUG] - Maintenance Mode:', isMaintenanceMode);
+        console.log('🔍 [DEBUG] - First Time Restricted:', isFirstTimeRestricted);
+        console.log('🔍 [DEBUG] - User Authenticated:', isAuthenticated);
+        
+        // If maintenance mode is active, always restrict access (highest priority)
+        if (isMaintenanceMode) {
+            console.log('🚫 [DEBUG] ACCESS DENIED: Maintenance mode is active (highest priority)');
+            return {
+                shouldRestrict: true,
+                reason: 'System is currently under maintenance',
+                type: 'MAINTENANCE_MODE'
+            };
+        }
+        
         // If first-time flag is true, always restrict regardless of authentication
         if (isFirstTimeRestricted) {
+            console.log('🚫 [DEBUG] ACCESS DENIED: First-time restriction is active');
             return {
                 shouldRestrict: true,
                 reason: 'First-time setup restriction is active',
@@ -79,6 +151,7 @@ class PageGuard {
         
         // If no first-time restriction but user is not authenticated, restrict access
         if (!isAuthenticated) {
+            console.log('🚫 [DEBUG] ACCESS DENIED: User authentication required');
             return {
                 shouldRestrict: true,
                 reason: 'User authentication required',
@@ -87,6 +160,8 @@ class PageGuard {
         }
         
         // Access allowed
+        console.log('✅ [DEBUG] ACCESS GRANTED: All checks passed');
+        console.log('🔍 [DEBUG] === ACCESS RESTRICTION CHECK COMPLETED ===');
         return {
             shouldRestrict: false,
             reason: 'Access granted',
@@ -112,11 +187,27 @@ class PageGuard {
      * @returns {Object} Restriction check result
      */
     checkAccessRestriction() {
-        const isFirstTimeRestricted = this.checkFirstTimeRestriction();
-        const isAuthenticated = this.checkUserAuthentication();
+        console.log('🔍 [DEBUG] === ACCESS RESTRICTION CHECK STARTED ===');
         
-        // If first-time restriction is active, block access regardless of authentication
+        // Check maintenance mode first (highest priority)
+        const isMaintenanceActive = this.checkMaintenanceMode();
+        console.log('🔍 [DEBUG] Maintenance mode check result:', isMaintenanceActive);
+        
+        if (isMaintenanceActive) {
+            console.log('🚫 [DEBUG] Access BLOCKED due to maintenance mode');
+            return {
+                shouldRestrict: true,
+                reason: 'System is currently under maintenance',
+                type: 'MAINTENANCE_MODE'
+            };
+        }
+        
+        // Check first-time restriction
+        const isFirstTimeRestricted = this.checkFirstTimeRestriction();
+        console.log('🔍 [DEBUG] First-time restriction check result:', isFirstTimeRestricted);
+        
         if (isFirstTimeRestricted) {
+            console.log('🚫 [DEBUG] Access BLOCKED due to first-time restriction');
             return {
                 shouldRestrict: true,
                 reason: 'First-time setup restriction is active',
@@ -124,8 +215,12 @@ class PageGuard {
             };
         }
         
-        // If no first-time restriction but user is not authenticated, block access
+        // Check user authentication
+        const isAuthenticated = this.checkUserAuthentication();
+        console.log('🔍 [DEBUG] User authentication check result:', isAuthenticated);
+        
         if (!isAuthenticated) {
+            console.log('🚫 [DEBUG] Access BLOCKED due to authentication requirement');
             return {
                 shouldRestrict: true,
                 reason: 'User authentication required',
@@ -133,7 +228,9 @@ class PageGuard {
             };
         }
         
-        // Allow access if authenticated and no restrictions
+        // Allow access if all checks pass
+        console.log('✅ [DEBUG] All access checks passed - Access ALLOWED');
+        console.log('🔍 [DEBUG] === ACCESS RESTRICTION CHECK COMPLETED ===');
         return {
             shouldRestrict: false,
             reason: 'Access allowed',
@@ -146,11 +243,32 @@ class PageGuard {
      * @param {Object} accessCheck - Access check result with restriction details
      */
     handleRestriction(accessCheck) {
-        // Prevent page content from loading
-        document.body.style.display = 'none';
+        console.log('🚫 [DEBUG] === HANDLING PAGE RESTRICTION ===');
+        console.log('🚫 [DEBUG] Restriction type:', accessCheck.type);
+        console.log('🚫 [DEBUG] Restriction reason:', accessCheck.reason);
         
-        // Show restriction message based on type
-        this.showRestrictionMessage(accessCheck);
+        // Wait for DOM to be ready before manipulating elements
+        const hidePageContent = () => {
+            if (document.body) {
+                document.body.style.display = 'none';
+                console.log('🚫 [DEBUG] Main page content hidden');
+            } else {
+                console.log('🚫 [DEBUG] document.body not ready, waiting...');
+                setTimeout(hidePageContent, 10);
+                return;
+            }
+            
+            // Show restriction message based on type
+            this.showRestrictionMessage(accessCheck);
+            console.log('🚫 [DEBUG] Restriction overlay displayed');
+        };
+        
+        // Start hiding content immediately or when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hidePageContent);
+        } else {
+            hidePageContent();
+        }
         
         // Determine redirect target based on restriction type
         const redirectTo = accessCheck.type === 'AUTHENTICATION_REQUIRED' 
@@ -161,6 +279,9 @@ class PageGuard {
         setTimeout(() => {
             window.location.href = redirectTo;
         }, 3000);
+        
+        console.log('🚫 [DEBUG] Redirect countdown started');
+        console.log('🚫 [DEBUG] === RESTRICTION HANDLING COMPLETED ===');
     }
 
     /**
@@ -171,7 +292,13 @@ class PageGuard {
         // Determine message content based on restriction type
         let icon, title, message, buttonText, redirectUrl;
         
-        if (accessCheck.type === 'AUTHENTICATION_REQUIRED') {
+        if (accessCheck.type === 'MAINTENANCE_MODE') {
+            icon = '🔧';
+            title = 'Maintenance Mode';
+            message = 'The ML directory is currently under maintenance. Please check back later or contact the administrator.';
+            buttonText = 'Go to Main App';
+            redirectUrl = '../index.html';
+        } else if (accessCheck.type === 'AUTHENTICATION_REQUIRED') {
             icon = '🔐';
             title = 'Authentication Required';
             message = 'You must be logged in to access the ML directory. Please sign in to continue.';
@@ -343,17 +470,27 @@ class PageGuard {
     if (isMLPath) {
         console.log('🔍 ML directory detected, initializing page guard...');
         
-        const pageGuard = new PageGuard();
-        const initialized = await pageGuard.initialize();
+        // Wait for DOM to be ready before initializing
+        const initializePageGuard = async () => {
+            const pageGuard = new PageGuard();
+            const initialized = await pageGuard.initialize();
+            
+            if (!initialized) {
+                console.log('🚫 Page access blocked by guard');
+            } else {
+                console.log('✅ Page guard allows access');
+            }
+            
+            // Make guard available globally for debugging
+            window.pageGuard = pageGuard;
+        };
         
-        if (!initialized) {
-            console.log('🚫 Page access blocked by guard');
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePageGuard);
         } else {
-            console.log('✅ Page guard allows access');
+            await initializePageGuard();
         }
-        
-        // Make guard available globally for debugging
-        window.pageGuard = pageGuard;
     }
 })();
 

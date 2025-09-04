@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Simulation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Login Simulation Test</h1>
+    
+    <div class="test-section">
+        <h2>Simulate User Login</h2>
+        <p>This will set session storage data to simulate a logged-in user, then redirect to the dashboard.</p>
+        
+        <button class="btn" onclick="simulateAdminLogin()">Simulate Admin Login</button>
+        <button class="btn" onclick="simulateModeratorLogin()">Simulate Moderator Login</button>
+        <button class="btn" onclick="simulateUserLogin()">Simulate User Login</button>
+        <button class="btn" onclick="clearSession()">Clear Session</button>
+        
+        <div id="output"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Current Session Data</h2>
+        <div id="sessionData"></div>
+        <button class="btn" onclick="showSessionData()">Refresh Session Data</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Dashboard</h2>
+        <button class="btn" onclick="goToDashboard()">Go to Dashboard</button>
+    </div>
+
+    <script>
+        function simulateAdminLogin() {
+            const userData = {
+                uid: 'admin-123',
+                email: 'admin@monfleur.com',
+                username: 'AdminUser',
+                displayName: 'Administrator',
+                name: 'Admin User',
+                role: 'administrator',
+                active: true,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
+            sessionStorage.setItem('adminEmail', userData.email);
+            sessionStorage.setItem('currentUser', JSON.stringify(userData));
+            sessionStorage.setItem('username', userData.username);
+            sessionStorage.setItem('userRole', userData.role);
+            
+            showOutput('Admin login simulated successfully!', 'success');
+            showSessionData();
+        }
+        
+        function simulateModeratorLogin() {
+            const userData = {
+                uid: 'mod-456',
+                email: 'moderator@monfleur.com',
+                username: 'ModUser',
+                displayName: 'Moderator',
+                name: 'Mod User',
+                role: 'moderator',
+                active: true,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
+            sessionStorage.setItem('adminEmail', userData.email);
+            sessionStorage.setItem('currentUser', JSON.stringify(userData));
+            sessionStorage.setItem('username', userData.username);
+            sessionStorage.setItem('userRole', userData.role);
+            
+            showOutput('Moderator login simulated successfully!', 'success');
+            showSessionData();
+        }
+        
+        function simulateUserLogin() {
+            const userData = {
+                uid: 'user-789',
+                email: 'testuser@example.com',
+                username: 'TestUser',
+                displayName: 'Test User',
+                name: 'Test User',
+                role: 'user',
+                active: true,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
+            sessionStorage.setItem('adminEmail', userData.email);
+            sessionStorage.setItem('currentUser', JSON.stringify(userData));
+            sessionStorage.setItem('username', userData.username);
+            sessionStorage.setItem('userRole', userData.role);
+            
+            showOutput('User login simulated successfully!', 'success');
+            showSessionData();
+        }
+        
+        function clearSession() {
+            sessionStorage.clear();
+            showOutput('Session cleared successfully!', 'info');
+            showSessionData();
+        }
+        
+        function showOutput(message, type) {
+            const output = document.getElementById('output');
+            output.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+        
+        function showSessionData() {
+            const container = document.getElementById('sessionData');
+            const keys = ['adminEmail', 'currentUser', 'username', 'userRole'];
+            
+            let html = '<h3>Session Storage Contents:</h3>';
+            
+            keys.forEach(key => {
+                const value = sessionStorage.getItem(key);
+                html += `<p><strong>${key}:</strong> `;
+                if (value) {
+                    if (key === 'currentUser') {
+                        try {
+                            const parsed = JSON.parse(value);
+                            html += `<pre style="background: #f1f1f1; padding: 5px; border-radius: 3px; font-size: 12px;">${JSON.stringify(parsed, null, 2)}</pre>`;
+                        } catch (e) {
+                            html += value;
+                        }
+                    } else {
+                        html += value;
+                    }
+                } else {
+                    html += '<em>Not set</em>';
+                }
+                html += '</p>';
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function goToDashboard() {
+            window.location.href = 'index.html';
+        }
+        
+        // Show session data on page load
+        document.addEventListener('DOMContentLoaded', showSessionData);
+    </script>
+</body>
+</html>

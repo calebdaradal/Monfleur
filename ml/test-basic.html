@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #output { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Basic JavaScript Test</h1>
+    <button onclick="runTest()">Run Test</button>
+    <div id="output">Click the button to run tests...</div>
+    
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            output.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            console.log(`[TEST] ${message}`);
+        }
+        
+        async function runTest() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<div class="info">Starting tests...</div>';
+            
+            log('✅ Basic JavaScript is working', 'success');
+            log('🔍 Testing module imports...', 'info');
+            
+            try {
+                // Test Firebase config import
+                log('📡 Importing Firebase config...', 'info');
+                const firebaseConfigModule = await import('./config/firebase-config.js');
+                log('✅ Firebase config imported successfully', 'success');
+                
+                const firebaseConfig = firebaseConfigModule.default;
+                const configInstance = new firebaseConfig();
+                log('✅ Firebase config instance created', 'success');
+                
+                // Test Firebase initialization
+                log('🔧 Initializing Firebase...', 'info');
+                const initialized = await configInstance.initialize();
+                log(`🔧 Firebase initialization: ${initialized ? 'SUCCESS' : 'FAILED'}`, initialized ? 'success' : 'error');
+                
+                if (initialized) {
+                    // Test LoggingService import
+                    log('📝 Importing LoggingService...', 'info');
+                    const LoggingServiceModule = await import('./services/logging-service.js');
+                    log('✅ LoggingService imported successfully', 'success');
+                    
+                    const LoggingService = LoggingServiceModule.default;
+                    const loggingService = new LoggingService();
+                    log('✅ LoggingService instance created', 'success');
+                    
+                    // Test LoggingService initialization
+                    log('🔧 Initializing LoggingService...', 'info');
+                    const serviceInitialized = await loggingService.initialize();
+                    log(`🔧 LoggingService initialization: ${serviceInitialized ? 'SUCCESS' : 'FAILED'}`, serviceInitialized ? 'success' : 'error');
+                    
+                    if (serviceInitialized) {
+                        // Test getting logs
+                        log('📋 Testing getLogs...', 'info');
+                        const logs = await loggingService.getLogs({ limit: 1 });
+                        log(`📋 Retrieved ${logs ? logs.length : 0} logs`, logs && logs.length > 0 ? 'success' : 'info');
+                        
+                        if (logs && logs.length > 0) {
+                            log('📋 Sample log data:', 'info');
+                            log(JSON.stringify(logs[0], null, 2), 'info');
+                        }
+                    }
+                }
+                
+                log('🎉 All tests completed!', 'success');
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+                log(`❌ Stack trace: ${error.stack}`, 'error');
+            }
+        }
+        
+        // Auto-run test on page load
+        window.addEventListener('load', () => {
+            setTimeout(runTest, 1000);
+        });
+    </script>
+</body>
+</html>

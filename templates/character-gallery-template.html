@@ -1,55 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Honkai: Star Rail Clone</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- Required CSS (include once per page) -->
-  <link rel="stylesheet" href="./CharacterList/character-gallery.css">
-</head>
+<!-- Character Gallery Template -->
+<!-- Required CSS (include once per page) -->
+<link rel="stylesheet" href="../CharacterList/character-gallery.css">
 
- 
-
-<body>
-  <!-- Section 1: Hero -->
-  <section class="panel hero">
-    <!-- Logo -->
-    <div class="logo">
-      <img src="assets/fleurwip.png" alt="Honkai: Star Rail Logo" class="logo" />
-    </div>
-
-    <!-- Menu Buttons -->
-    <div class="menu-buttons">
-      <a href="page1.html" class="btn"></a>
-      <a href="page2.html" class="btn"></a>
-       <button id="loginBtn" class="btn login-btn">Lore</button>
-      <a href="ml/index.html" class="btn">Masterlist</a> <!-- replaced Page 4 -->
-    </div>
-
-    <div class="hero-content">
-      <img src="assets/MFTITLE.png" alt="Game Title" class="title-image" />
-      <p>A Sensual Sheepder CS</p>
-    </div>
-  </section>
-
-  <!-- Section 2: Intro -->
-  <section class="panel intro">
-    <div class="intro-container">
-      <div class="intro-text">
-        <h2>Discover the Universe</h2>
-        <p>
-          Board the Astral Express and explore the infinite wonders of the galaxy.
-          Meet new companions, face thrilling adventures, and uncover hidden secrets.
-        </p>
-      </div>
-      <div class="intro-media">
-        <img src="https://placehold.co/600x400?text=Game+Artwork" alt="Game Artwork" />
-      </div>
-    </div>
-  </section>
-
-  <section class="character-gallery-section">
+<!-- Copy this HTML section wherever you want to display characters -->
+<section class="character-gallery-section">
     <!-- Gallery Header -->
     <div class="gallery-header">
         <h2 class="gallery-title">Character Gallery</h2>
@@ -111,9 +65,11 @@
     </div>
 </section>
 
+
+
 <!-- Required JavaScript Import -->
 <script type="module">
-    import { CharacterGalleryManager } from './CharacterList/character-gallery-manager.js';
+    import { CharacterGalleryManager } from '../CharacterList/character-gallery-manager.js';
     
     // Initialize the character gallery when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
@@ -129,5 +85,3 @@
         // });
     });
 </script>
-</body>
-</html>

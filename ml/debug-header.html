@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-title {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .debug-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        pre {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .test-header {
+            border: 2px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            background: white;
+        }
+        .header-info {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Header Debug Test</h1>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">Session Storage Contents</h2>
+        <div id="sessionStorageDebug"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">Header Component Test</h2>
+        <div class="test-header">
+            <h1>Manual Test Header</h1>
+            <div class="header-actions">
+                <div class="header-info" id="headerUserInfo">Loading...</div>
+            </div>
+        </div>
+        <div class="main-header" style="border: 2px solid #28a745; padding: 15px; margin: 10px 0; border-radius: 8px; background: #f8f9fa;">
+            <!-- This will be populated by the DashboardHeader component -->
+        </div>
+        <div id="headerDebugOutput"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">Manual User Info Test</h2>
+        <div id="manualTestOutput"></div>
+        <button onclick="testUserInfoRetrieval()">Test User Info Retrieval</button>
+    </div>
+
+    <script>
+        // Debug session storage contents
+        function debugSessionStorage() {
+            const container = document.getElementById('sessionStorageDebug');
+            const items = [
+                'adminEmail',
+                'currentUser', 
+                'username',
+                'userRole'
+            ];
+            
+            let html = '';
+            
+            items.forEach(key => {
+                const value = sessionStorage.getItem(key);
+                const className = value ? 'success' : 'warning';
+                html += `<div class="debug-item ${className}">`;
+                html += `<strong>${key}:</strong> `;
+                if (value) {
+                    if (key === 'currentUser') {
+                        try {
+                            const parsed = JSON.parse(value);
+                            html += `<pre>${JSON.stringify(parsed, null, 2)}</pre>`;
+                        } catch (e) {
+                            html += `${value} (Invalid JSON)`;
+                        }
+                    } else {
+                        html += value;
+                    }
+                } else {
+                    html += '<em>Not found</em>';
+                }
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Test user info retrieval like the header component does
+        async function testUserInfoRetrieval() {
+            const output = document.getElementById('manualTestOutput');
+            output.innerHTML = '<div class="debug-item">Testing user info retrieval...</div>';
+            
+            try {
+                // Simulate the header component's getUserInfo method
+                const currentUserData = sessionStorage.getItem('currentUser');
+                const adminEmail = sessionStorage.getItem('adminEmail');
+                const userRole = sessionStorage.getItem('userRole');
+                
+                let userInfo = null;
+                
+                if (currentUserData) {
+                    const user = JSON.parse(currentUserData);
+                    userInfo = {
+                        role: user.role || userRole || 'Moderator',
+                        displayName: user.displayName || user.username || user.name || null,
+                        email: user.email
+                    };
+                } else if (adminEmail) {
+                    userInfo = {
+                        role: userRole || 'Moderator',
+                        displayName: adminEmail.split('@')[0],
+                        email: adminEmail
+                    };
+                } else {
+                    userInfo = {
+                        role: userRole || 'Moderator',
+                        displayName: null
+                    };
+                }
+                
+                // Test display text generation
+                let displayText;
+                if (userInfo.displayName) {
+                    displayText = `Welcome, ${userInfo.displayName}`;
+                } else if (userInfo.email) {
+                    const username = userInfo.email.split('@')[0];
+                    displayText = `Welcome, ${username}`;
+                } else {
+                    displayText = 'Welcome, User';
+                }
+                
+                if (userInfo.role && userInfo.role !== 'user') {
+                    const roleDisplay = userInfo.role.charAt(0).toUpperCase() + userInfo.role.slice(1).toLowerCase();
+                    displayText += ` (${roleDisplay})`;
+                }
+                
+                output.innerHTML = `
+                    <div class="debug-item success">
+                        <strong>User Info Object:</strong>
+                        <pre>${JSON.stringify(userInfo, null, 2)}</pre>
+                    </div>
+                    <div class="debug-item success">
+                        <strong>Generated Display Text:</strong> ${displayText}
+                    </div>
+                `;
+                
+                // Update the test header
+                document.getElementById('headerUserInfo').textContent = displayText;
+                
+            } catch (error) {
+                output.innerHTML = `<div class="debug-item error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        // Load and test header component
+        function loadHeaderComponent() {
+            const script = document.createElement('script');
+            script.src = 'components/header.js';
+            script.onload = () => {
+                const output = document.getElementById('headerDebugOutput');
+                try {
+                    // Create header instance
+                    const header = new DashboardHeader({
+                        pageTitle: 'Debug Test Dashboard',
+                        showSwitchAccount: false
+                    });
+                    
+                    output.innerHTML = '<div class="debug-item success">Header component loaded and initialized successfully</div>';
+                } catch (error) {
+                    output.innerHTML = `<div class="debug-item error"><strong>Header Error:</strong> ${error.message}</div>`;
+                }
+            };
+            script.onerror = () => {
+                const output = document.getElementById('headerDebugOutput');
+                output.innerHTML = '<div class="debug-item error">Failed to load header component</div>';
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Initialize debug on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            debugSessionStorage();
+            loadHeaderComponent();
+            
+            // Auto-test user info retrieval
+            setTimeout(testUserInfoRetrieval, 1000);
+        });
+    </script>
+</body>
+</html>

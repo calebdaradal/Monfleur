@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Logging Service</title>
+</head>
+<body>
+    <h1>Test Logging Service</h1>
+    <button id="addTestLog">Add Test Log</button>
+    <button id="addMultipleLogs">Add Multiple Test Logs</button>
+    <button id="viewLogs">View Logs</button>
+    <button id="clearLogs">Clear All Logs</button>
+    <div id="output"></div>
+
+    <script type="module">
+        import LoggingService from './services/logging-service.js';
+
+        const output = document.getElementById('output');
+
+        document.getElementById('addTestLog').addEventListener('click', async () => {
+            try {
+                output.innerHTML = 'Adding test log...';
+                
+                // Initialize if needed
+                if (!LoggingService.isInitialized) {
+                    await LoggingService.initialize();
+                }
+
+                // Add a test log
+                const success = await LoggingService.logCharacterActivity(
+                    'UPLOAD',
+                    'TestUser',
+                    'ML-0001',
+                    { description: 'Test character upload' }
+                );
+
+                if (success) {
+                    output.innerHTML = '✅ Test log added successfully!';
+                } else {
+                    output.innerHTML = '❌ Failed to add test log';
+                }
+            } catch (error) {
+                output.innerHTML = `❌ Error: ${error.message}`;
+                console.error('Error adding test log:', error);
+            }
+        });
+
+        document.getElementById('addMultipleLogs').addEventListener('click', async () => {
+            try {
+                output.innerHTML = 'Adding multiple test logs...';
+                
+                // Initialize if needed
+                if (!LoggingService.isInitialized) {
+                    await LoggingService.initialize();
+                }
+
+                // Add multiple test logs
+                const testLogs = [
+                    { type: 'UPLOAD', user: 'Alice', masterlist: 'ML-0001', desc: 'New character Alice uploaded' },
+                    { type: 'EDIT', user: 'Bob', masterlist: 'ML-0002', desc: 'Character Bob updated' },
+                    { type: 'DELETE', user: 'Charlie', masterlist: 'ML-0003', desc: 'Character Charlie deleted' },
+                    { type: 'UPLOAD', user: 'Diana', masterlist: 'ML-0004', desc: 'New character Diana uploaded' }
+                ];
+
+                let successCount = 0;
+                for (const log of testLogs) {
+                    const success = await LoggingService.logCharacterActivity(
+                        log.type,
+                        log.user,
+                        log.masterlist,
+                        { description: log.desc }
+                    );
+                    if (success) successCount++;
+                    // Add small delay between logs
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                output.innerHTML = `✅ Added ${successCount}/${testLogs.length} test logs successfully!`;
+            } catch (error) {
+                output.innerHTML = `❌ Error: ${error.message}`;
+                console.error('Error adding multiple logs:', error);
+            }
+        });
+
+        document.getElementById('viewLogs').addEventListener('click', async () => {
+            try {
+                output.innerHTML = 'Loading logs...';
+                
+                // Initialize if needed
+                if (!LoggingService.isInitialized) {
+                    await LoggingService.initialize();
+                }
+
+                // Get logs
+                const logs = await LoggingService.getLogs({ limit: 10 });
+                
+                if (logs && logs.length > 0) {
+                    output.innerHTML = `<h3>Found ${logs.length} logs:</h3><pre>${JSON.stringify(logs, null, 2)}</pre>`;
+                } else {
+                    output.innerHTML = 'No logs found in database';
+                }
+            } catch (error) {
+                output.innerHTML = `❌ Error: ${error.message}`;
+                console.error('Error viewing logs:', error);
+            }
+        });
+
+        document.getElementById('clearLogs').addEventListener('click', async () => {
+            try {
+                output.innerHTML = 'This feature requires manual database access to clear logs.';
+            } catch (error) {
+                output.innerHTML = `❌ Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

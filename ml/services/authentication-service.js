@@ -324,11 +324,29 @@ class AuthenticationService {
         try {
             const adminEmail = sessionStorage.getItem('adminEmail');
             const currentUserData = sessionStorage.getItem('currentUser');
+            const username = sessionStorage.getItem('username');
             
-            if (adminEmail && currentUserData) {
-                const user = JSON.parse(currentUserData);
-                this.currentUser = user;
-                console.log('✅ Session restored for:', adminEmail);
+            // Try to restore from currentUser data first
+            if (currentUserData) {
+                try {
+                    const user = JSON.parse(currentUserData);
+                    this.currentUser = user;
+                    console.log('✅ Session restored from currentUser for:', user.email || user.username);
+                    return true;
+                } catch (parseError) {
+                    console.warn('⚠️ Failed to parse currentUser data:', parseError);
+                }
+            }
+            
+            // Fallback to adminEmail if currentUser is not available
+            if (adminEmail) {
+                this.currentUser = {
+                    email: adminEmail,
+                    username: username || adminEmail.split('@')[0],
+                    role: 'moderator', // Default role for legacy sessions
+                    uid: 'legacy-' + Date.now()
+                };
+                console.log('✅ Session restored from adminEmail for:', adminEmail);
                 return true;
             }
             

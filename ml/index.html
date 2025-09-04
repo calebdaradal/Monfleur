@@ -6,6 +6,9 @@
     <title>Character Management Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Page Guard - Must be loaded first for maintenance mode protection -->
+    <script src="common/page-guard.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -51,7 +54,7 @@
                         <div class="stat-content">
                             <div class="stat-text">
                                 <p class="stat-label">Total Characters</p>
-                                <p class="stat-value">1,247</p>
+                                <p class="stat-value"></p>
                             </div>
                             <div class="stat-icon">
                                 <i class="fas fa-database"></i>
@@ -96,45 +99,15 @@
                         </div>
                         <div class="card-content">
                             <div class="activity-list">
+                                <!-- Loading placeholder - will be replaced by JavaScript -->
                                 <div class="activity-item">
                                     <div class="activity-main">
-                                        <p class="activity-action">New character uploaded</p>
+                                        <p class="activity-action">Loading recent activities...</p>
                                         <div class="activity-meta">
-                                            <span class="activity-user">by Alice Smith</span>
-                                            <span class="activity-badge">ML-247</span>
+                                            <span class="activity-user">System</span>
                                         </div>
                                     </div>
-                                    <span class="activity-time">2 minutes ago</span>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-main">
-                                        <p class="activity-action">Character approved</p>
-                                        <div class="activity-meta">
-                                            <span class="activity-user">by Moderator</span>
-                                            <span class="activity-badge">ML-246</span>
-                                        </div>
-                                    </div>
-                                    <span class="activity-time">15 minutes ago</span>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-main">
-                                        <p class="activity-action">Profile updated</p>
-                                        <div class="activity-meta">
-                                            <span class="activity-user">by Bob Johnson</span>
-                                            <span class="activity-badge">ML-245</span>
-                                        </div>
-                                    </div>
-                                    <span class="activity-time">1 hour ago</span>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="activity-main">
-                                        <p class="activity-action">Character trait updated</p>
-                                        <div class="activity-meta">
-                                            <span class="activity-user">by Charlie Brown</span>
-                                            <span class="activity-badge">ML-244</span>
-                                        </div>
-                                    </div>
-                                    <span class="activity-time">2 hours ago</span>
+                                    <span class="activity-time">-</span>
                                 </div>
                             </div>
                         </div>
@@ -142,62 +115,103 @@
                 </div>
 
                 <!-- System Status -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>System Status</h3>
-                    </div>
-                    <div class="card-content">
-                        <div class="status-grid">
-                            <div class="status-item">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 85%;"></div>
-                                </div>
-                                <p class="status-label">Database Usage</p>
-                                <p class="status-detail">85% of 100GB used</p>
-                            </div>
-                            <div class="status-item">
-                                <div class="progress-bar">
-                                    <div class="progress-fill blue" style="width: 60%;"></div>
-                                </div>
-                                <p class="status-label">Storage Usage</p>
-                                <p class="status-detail">60% of 500GB used</p>
-                            </div>
-                            <div class="status-item">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 95%;"></div>
-                                </div>
-                                <p class="status-label">System Health</p>
-                                <p class="status-detail">All systems operational</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </main>
     </div>
     
     <!-- Dashboard JavaScript -->
-    <!-- Page Guard - Must load first to enforce restrictions -->
-    <script src="common/page-guard.js"></script>
-    <!-- Header Component -->
-    <script src="components/header.js"></script>
-    <!-- Navigation Component -->
-    <script src="components/navigation.js"></script>
-    <script>
-        // Initialize header and navigation components
+    <!-- Dashboard Initialization -->
+    <script type="module">
+        // Simplified dashboard initialization
         document.addEventListener('DOMContentLoaded', async function() {
-            new DashboardHeader({
-                pageTitle: 'Character Management System',
-                userRole: 'Moderator',
-                showSwitchAccount: true
-            });
-            
-            // Initialize navigation with async role loading
-            const navigation = new DashboardNavigation({
-                currentPage: 'index.html'
-            });
-            // Navigation init is now async and handles role loading internally
+            try {
+                console.log('🚀 Starting dashboard initialization...');
+                
+                // Load all components sequentially to avoid conflicts
+                await loadComponentsSequentially();
+                
+            } catch (error) {
+                console.error('❌ Dashboard initialization error:', error);
+                // Fallback to login if there's an initialization error
+                window.location.href = '../login.html';
+            }
         });
+        
+        // Load dashboard components in proper sequence
+        async function loadComponentsSequentially() {
+            // Load header component first
+            await loadScript('components/header.js');
+            console.log('✅ Header component loaded');
+            
+            // Load navigation component
+            await loadScript('components/navigation.js');
+            console.log('✅ Navigation component loaded');
+            
+            // Load dashboard manager (this handles authentication)
+            await loadScript('dashboard.js', 'module');
+            console.log('✅ Dashboard script loaded');
+            
+            // Initialize components after all scripts are loaded
+            initializeComponents();
+            
+            // Initialize dashboard manager with authentication
+            setTimeout(async () => {
+                console.log('🚀 Initializing dashboard manager...');
+                try {
+                    const dashboardManager = new window.DashboardManager();
+                    const initialized = await dashboardManager.initialize();
+                    
+                    if (initialized !== false) {
+                        window.dashboardManager = dashboardManager;
+                        console.log('✅ Dashboard initialization complete');
+                    }
+                } catch (error) {
+                    console.error('❌ Error in dashboard initialization:', error);
+                    window.location.href = '../login.html';
+                }
+            }, 300);
+        }
+        
+        // Helper function to load scripts with promises
+        function loadScript(src, type = null) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                if (type) script.type = type;
+                
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+                
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Initialize dashboard components
+        function initializeComponents() {
+            try {
+                // Initialize header
+                const header = new DashboardHeader({
+                    pageTitle: 'Character Management System',
+                    showSwitchAccount: true
+                });
+                
+                // Store header reference globally
+                window.dashboardHeader = header;
+                
+                // Initialize navigation
+                const navigation = new DashboardNavigation({
+                    currentPage: 'index.html'
+                });
+                
+                // Store navigation reference globally for dashboard manager
+                window.dashboardNavigation = navigation;
+                
+                console.log('✅ Dashboard components initialized');
+            } catch (error) {
+                console.error('❌ Error initializing components:', error);
+            }
+        }
     </script>
 
 </body>

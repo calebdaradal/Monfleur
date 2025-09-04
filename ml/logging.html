@@ -6,6 +6,9 @@
     <title>Logging - Character Management Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Page Guard - Must be loaded first for maintenance mode protection -->
+    <script src="common/page-guard.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -40,10 +43,9 @@
                         <div class="log-filters">
                             <select id="logTypeFilter">
                                 <option value="all">All Types</option>
-                                <option value="upload">Uploads</option>
-                                <option value="edit">Edits</option>
-                                <option value="delete">Deletions</option>
-                                <option value="system">System</option>
+                                <option value="UPLOAD">UPLOAD</option>
+                                <option value="EDIT">EDIT</option>
+                                <option value="DELETE">DELETE</option>
                             </select>
                             <select id="logDateFilter">
                                 <option value="all">All Time</option>
@@ -64,14 +66,13 @@
                         <div class="logs-table-container">
                             <table class="logs-table">
                                 <thead>
-                                    <tr>
-                                        <th>Timestamp</th>
-                                        <th>Type</th>
-                                        <th>User</th>
-                                        <th>Action</th>
-                                        <th>Details</th>
-                                    </tr>
-                                </thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Type</th>
+                                <th>User</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
                                 <tbody id="logsTableBody">
                                     <!-- Logs will be populated by JavaScript -->
                                 </tbody>
@@ -103,6 +104,6 @@
             // Navigation init is now async and handles role loading internally
         });
     </script>
-    <script src="logging.js"></script>
+    <script type="module" src="logging.js"></script>
 </body>
 </html>

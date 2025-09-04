@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Gallery - Monfleur</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-foreground: #ffffff;
+            --secondary: #f1f5f9;
+            --secondary-foreground: #0f172a;
+            --muted: #f8fafc;
+            --muted-foreground: #64748b;
+            --accent: #f1f5f9;
+            --accent-foreground: #0f172a;
+            --destructive: #ef4444;
+            --destructive-foreground: #ffffff;
+            --border: #e2e8f0;
+            --input: #ffffff;
+            --ring: #3b82f6;
+            --background: #ffffff;
+            --foreground: #0f172a;
+            --card: #ffffff;
+            --card-foreground: #0f172a;
+            --popover: #ffffff;
+            --popover-foreground: #0f172a;
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: var(--muted-foreground);
+        }
+
+        .search-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-input i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted-foreground);
+        }
+
+        .search-input input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--input);
+            color: var(--foreground);
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input input:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-select {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--card);
+            color: var(--foreground);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--ring);
+        }
+
+        .results-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            /* color: var(--muted-foreground); */
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            min-height: 300px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--muted);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .character-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .character-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .character-image-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: var(--muted);
+        }
+
+        .character-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.2s ease;
+        }
+
+        .character-card:hover .character-image {
+            transform: scale(1.05);
+        }
+
+        .character-info {
+            padding: 1rem;
+        }
+
+        .character-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .character-ml {
+            font-weight: 600;
+            font-size: 1.125rem;
+            color: var(--foreground);
+        }
+
+        .character-rarity {
+            padding: 0.25rem 0.75rem;
+            border-radius: calc(var(--radius) * 0.5);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .rarity-common { background-color: #6b7280; }
+        .rarity-uncommon { background-color: #10b981; }
+        .rarity-rare { background-color: #3b82f6; }
+        .rarity-ultra-rare { background-color: #8b5cf6; }
+
+        .character-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .character-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .character-detail strong {
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 0.125rem 0.5rem;
+            border-radius: calc(var(--radius) * 0.5);
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: var(--secondary);
+            color: var(--secondary-foreground);
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--destructive);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted-foreground);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .search-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input {
+                min-width: auto;
+            }
+
+            .characters-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+
+            .results-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <h1><i class="fas fa-dragon"></i> Character Gallery</h1>
+            <p>Explore the complete collection of Monfleur characters</p>
+        </header>
+
+        <!-- Search and Filter Section -->
+        <div class="search-section">
+            <div class="search-controls">
+                <div class="search-input">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search by ML number, owner, or artist...">
+                </div>
+                <select id="rarityFilter" class="filter-select">
+                    <option value="all">All Rarities</option>
+                    <option value="Common">Common</option>
+                    <option value="Uncommon">Uncommon</option>
+                    <option value="Rare">Rare</option>
+                    <option value="Ultra Rare">Ultra Rare</option>
+                </select>
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">All Statuses</option>
+                    <option value="trade-gift">Trade/Gift</option>
+                    <option value="trade-gift-resell">Trade/Gift/Resell</option>
+                    <option value="not-for-trade">Not for Trade</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Results Info -->
+        <div class="results-info">
+            <span id="resultsCount">Loading characters...</span>
+        </div>
+
+        <!-- Characters Grid -->
+        <div id="charactersContainer">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        /**
+         * Character Gallery Application
+         * Handles fetching and displaying character data from Firebase
+         * Follows Single Responsibility and Open/Closed Principles
+         */
+        class CharacterGalleryApp {
+            constructor() {
+                this.characters = [];
+                this.filteredCharacters = [];
+                this.database = null;
+                this.isLoading = true;
+                
+                this.init();
+            }
+
+            /**
+             * Initialize the application
+             */
+            async init() {
+                try {
+                    await this.initializeFirebase();
+                    await this.loadCharacters();
+                    this.setupEventListeners();
+                } catch (error) {
+                    console.error('Failed to initialize application:', error);
+                    this.showError('Failed to load character data. Please refresh the page.');
+                }
+            }
+
+            /**
+             * Initialize Firebase connection
+             */
+            async initializeFirebase() {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAMzMFswpaT38o21WmYDGuIobkRSAHrJvY",
+                    authDomain: "monfleur-45b76.firebaseapp.com",
+                    databaseURL: "https://monfleur-45b76-default-rtdb.firebaseio.com",
+                    projectId: "monfleur-45b76",
+                    storageBucket: "monfleur-45b76.firebasestorage.app",
+                    messagingSenderId: "243740121037",
+                    appId: "1:243740121037:web:367c21d278101c08019684"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                this.database = getDatabase(app);
+                console.log('Firebase initialized successfully');
+            }
+
+            /**
+             * Load characters from Firebase
+             */
+            async loadCharacters() {
+                try {
+                    const charactersRef = ref(this.database, 'characters');
+                    const snapshot = await get(charactersRef);
+                    
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        this.characters = Object.keys(data).map(key => ({
+                            id: key,
+                            ...data[key]
+                        }));
+                        
+                        // Sort by masterlist number
+                        this.characters.sort((a, b) => {
+                            const aNum = parseInt(a.masterlistNumber?.replace('ML-', '') || '0');
+                            const bNum = parseInt(b.masterlistNumber?.replace('ML-', '') || '0');
+                            return aNum - bNum;
+                        });
+                        
+                        this.filteredCharacters = [...this.characters];
+                        console.log(`Loaded ${this.characters.length} characters`);
+                    } else {
+                        this.characters = [];
+                        this.filteredCharacters = [];
+                        console.log('No characters found in database');
+                    }
+                    
+                    this.isLoading = false;
+                    this.renderCharacters();
+                    this.updateResultsCount();
+                } catch (error) {
+                    console.error('Error loading characters:', error);
+                    this.isLoading = false;
+                    this.showError('Failed to load characters from database.');
+                }
+            }
+
+            /**
+             * Setup event listeners for search and filters
+             */
+            setupEventListeners() {
+                const searchInput = document.getElementById('searchInput');
+                const rarityFilter = document.getElementById('rarityFilter');
+                const statusFilter = document.getElementById('statusFilter');
+
+                // Debounced search
+                let searchTimeout;
+                searchInput.addEventListener('input', () => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => this.applyFilters(), 300);
+                });
+
+                rarityFilter.addEventListener('change', () => this.applyFilters());
+                statusFilter.addEventListener('change', () => this.applyFilters());
+            }
+
+            /**
+             * Apply search and filter criteria
+             */
+            applyFilters() {
+                const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+                const rarityFilter = document.getElementById('rarityFilter').value;
+                const statusFilter = document.getElementById('statusFilter').value;
+
+                this.filteredCharacters = this.characters.filter(character => {
+                    // Search filter
+                    const matchesSearch = !searchQuery || 
+                        character.masterlistNumber?.toLowerCase().includes(searchQuery) ||
+                        character.owner?.toLowerCase().includes(searchQuery) ||
+                        character.artist?.toLowerCase().includes(searchQuery) ||
+                        character.biome?.toLowerCase().includes(searchQuery);
+
+                    // Rarity filter
+                    const matchesRarity = rarityFilter === 'all' || character.rarity === rarityFilter;
+
+                    // Status filter
+                    const matchesStatus = statusFilter === 'all' || character.status === statusFilter;
+
+                    return matchesSearch && matchesRarity && matchesStatus;
+                });
+
+                this.renderCharacters();
+                this.updateResultsCount();
+            }
+
+            /**
+             * Render character cards
+             */
+            renderCharacters() {
+                const container = document.getElementById('charactersContainer');
+                
+                if (this.isLoading) {
+                    container.innerHTML = `
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (this.filteredCharacters.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h3>No characters found</h3>
+                            <p>Try adjusting your search criteria or filters.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const charactersGrid = document.createElement('div');
+                charactersGrid.className = 'characters-grid';
+                
+                charactersGrid.innerHTML = this.filteredCharacters.map(character => 
+                    this.createCharacterCard(character)
+                ).join('');
+                
+                container.innerHTML = '';
+                container.appendChild(charactersGrid);
+            }
+
+            /**
+             * Handle image loading errors with fallback logic
+             * @param {HTMLImageElement} img - Image element that failed to load
+             */
+            handleImageError(img) {
+                if (!img.dataset.tried) {
+                    // First failure - try fallback URL
+                    img.dataset.tried = 'true';
+                    img.src = img.dataset.fallback;
+                } else {
+                    // Second failure - use placeholder
+                    img.src = img.dataset.placeholder;
+                }
+            }
+
+            /**
+             * Convert Google Drive share link to thumbnail URL
+             * @param {string} shareUrl - Google Drive share URL
+             * @param {string} size - Size parameter (default: 'w400-h400')
+             * @returns {string} Thumbnail URL
+             */
+            convertGoogleDriveUrl(shareUrl, size = 'w400-h400') {
+                if (!shareUrl) return '';
+                
+                // Handle different Google Drive URL formats
+                const patterns = [
+                    /\/file\/d\/([a-zA-Z0-9-_]+)/,
+                    /id=([a-zA-Z0-9-_]+)/,
+                    /\/d\/([a-zA-Z0-9-_]+)\//
+                ];
+                
+                for (const pattern of patterns) {
+                    const match = shareUrl.match(pattern);
+                    if (match) {
+                        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=${size}`;
+                    }
+                }
+                
+                return shareUrl; // Return original if no pattern matches
+            }
+
+            /**
+             * Create HTML for a character card
+             * @param {Object} character - Character data
+             * @returns {string} HTML string
+             */
+            createCharacterCard(character) {
+                // Convert Google Drive URL to thumbnail if needed
+                const rawImageUrl = character.imageUrl || '';
+                const imageUrl = rawImageUrl ? this.convertGoogleDriveUrl(rawImageUrl) : this.getPlaceholderImage();
+                const rarityClass = character.rarity?.toLowerCase().replace(' ', '-') || 'common';
+                
+                return `
+                    <div class="character-card" data-character-id="${character.id}">
+                        <div class="character-image-container">
+                            <img src="${imageUrl}" 
+                                 alt="${character.masterlistNumber}" 
+                                 class="character-image"
+                                 data-fallback="${rawImageUrl ? this.convertGoogleDriveUrl(rawImageUrl, 'w800-h800') : this.getPlaceholderImage()}"
+                                 data-placeholder="${this.getPlaceholderImage()}"
+                                 onerror="window.characterGalleryApp.handleImageError(this)">
+                        </div>
+                        <div class="character-info">
+                            <div class="character-header">
+                                <span class="character-ml">${character.masterlistNumber || 'N/A'}</span>
+                                <span class="character-rarity rarity-${rarityClass}">${character.rarity || 'Common'}</span>
+                            </div>
+                            <div class="character-details">
+                                <div class="character-detail">
+                                    <strong>Owner:</strong>
+                                    <span>${character.owner || 'Unknown'}</span>
+                                </div>
+                                <div class="character-detail">
+                                    <strong>Artist:</strong>
+                                    <span>${character.artist || 'Unknown'}</span>
+                                </div>
+                                <div class="character-detail">
+                                    <strong>Biome:</strong>
+                                    <span>${character.biome || 'Unknown'}</span>
+                                </div>
+                                <div class="character-detail">
+                                    <strong>Status:</strong>
+                                    <span class="status-badge">${this.formatStatus(character.status)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            /**
+             * Format status text for display
+             * @param {string} status - Raw status value
+             * @returns {string} Formatted status
+             */
+            formatStatus(status) {
+                if (!status) return 'Unknown';
+                return status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
+
+            /**
+             * Get placeholder image for characters without images
+             * @returns {string} Base64 encoded SVG placeholder
+             */
+            getPlaceholderImage() {
+                return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjEwMCIgcj0iNDAiIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB4PSIxMzAiIHk9IjgwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0Y5RkFGQiI+CjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0tMiAxNWwtNS01aDNWOWg0djNoM2wtNSA1eiIvPgo8L3N2Zz4KPC9zdmc+';
+            }
+
+            /**
+             * Update results count display
+             */
+            updateResultsCount() {
+                const countElement = document.getElementById('resultsCount');
+                if (countElement) {
+                    const filtered = this.filteredCharacters.length;
+                    const total = this.characters.length;
+                    countElement.textContent = `Showing ${filtered} of ${total} characters`;
+                }
+            }
+
+            /**
+             * Show error message
+             * @param {string} message - Error message to display
+             */
+            showError(message) {
+                const container = document.getElementById('charactersContainer');
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error</h3>
+                        <p>${message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.characterGalleryApp = new CharacterGalleryApp();
+        });
+    </script>
+</body>
+</html>
