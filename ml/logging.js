@@ -6,6 +6,7 @@
 
 import loggingService from './services/logging-service.js';
 import AuthenticationService from './services/authentication-service.js';
+import firebaseConfig from './config/firebase-config.js';
 
 // Create authentication service instance
 const authenticationService = new AuthenticationService();
@@ -20,6 +21,14 @@ class LoggingPageManager {
         this.filteredLogs = [];
         this.realtimeUnsubscribe = null;
         this.isInitialized = false;
+        this.userCache = new Map(); // Cache for user email lookups
+        this.db = null;
+        this.firestoreFunctions = null;
+        
+        // Pagination properties
+        this.currentPage = 1;
+        this.itemsPerPage = 10;
+        this.totalPages = 1;
         
         console.log('📊 Logging Page Manager initialized');
     }
@@ -30,6 +39,9 @@ class LoggingPageManager {
      */
     async initialize() {
         try {
+            // Initialize Firebase for user lookups
+            await this.initializeFirebase();
+
             // Initialize logging service
             const loggingInitialized = await loggingService.initialize();
             if (!loggingInitialized) {
@@ -137,6 +149,8 @@ class LoggingPageManager {
             dateRange: dateFilter
         });
 
+        // Reset to first page when filters change
+        this.currentPage = 1;
         this.renderLogs();
     }
 
@@ -162,22 +176,198 @@ class LoggingPageManager {
                     </td>
                 </tr>
             `;
+            this.updatePaginationInfo();
             return;
         }
 
-        tbody.innerHTML = this.filteredLogs.map(log => {
+        // Calculate pagination
+        this.totalPages = Math.ceil(this.filteredLogs.length / this.itemsPerPage);
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const paginatedLogs = this.filteredLogs.slice(startIndex, endIndex);
+
+        tbody.innerHTML = paginatedLogs.map((log, index) => {
             const formattedTimestamp = loggingService.formatTimestamp(log.timestamp);
             const typeClass = this.getTypeClass(log.type);
+            const detailsContent = this.formatLogDetails(log, startIndex + index);
+            const userCell = this.renderUserCell(log.user || 'Unknown User');
             
             return `
                 <tr>
                     <td>${formattedTimestamp}</td>
                     <td><span class="log-type ${typeClass}">${log.type}</span></td>
-                    <td>${this.escapeHtml(log.user || 'Unknown User')}</td>
-                    <td>${this.escapeHtml(log.details || log.masterlistNumber || 'No details')}</td>
+                    <td>${userCell}</td>
+                    <td>${detailsContent}</td>
                 </tr>
             `;
         }).join('');
+        
+        // Update pagination controls
+        this.updatePaginationInfo();
+        this.renderPaginationControls();
+        
+        // Setup hover event listeners for administrator users
+        if (authenticationService.isAdministrator()) {
+            this.setupUserHoverEvents();
+        }
+    }
+
+    /**
+     * Render user cell with hover functionality for administrators
+     * @param {string} username - Username to display
+     * @returns {string} HTML for user cell
+     */
+    renderUserCell(username) {
+        const escapedUsername = this.escapeHtml(username);
+        
+        // If current user is administrator, add hover functionality
+        if (authenticationService.isAdministrator()) {
+            return `<span class="hoverable-username" data-username="${escapedUsername}">${escapedUsername}<span class="email-tooltip"></span></span>`;
+        }
+        
+        // Regular display for non-administrators
+        return escapedUsername;
+    }
+
+    /**
+     * Setup hover event listeners for username tooltips
+     */
+    setupUserHoverEvents() {
+        const hoverableUsernames = document.querySelectorAll('.hoverable-username');
+        
+        hoverableUsernames.forEach(element => {
+            const username = element.dataset.username;
+            const tooltip = element.querySelector('.email-tooltip');
+            
+            element.addEventListener('mouseenter', async () => {
+                // Show loading state
+                tooltip.textContent = 'Loading...';
+                tooltip.classList.add('visible');
+                
+                // Fetch user email
+                const email = await this.getUserEmailByUsername(username);
+                
+                // Update tooltip content
+                if (email) {
+                    tooltip.textContent = email;
+                } else {
+                    tooltip.textContent = 'Email not found';
+                }
+            });
+            
+            element.addEventListener('mouseleave', () => {
+                tooltip.classList.remove('visible');
+            });
+        });
+    }
+
+    /**
+     * Format log details based on log type and changes
+     * @param {Object} log - Log entry
+     * @param {number} index - Log index for unique IDs
+     * @returns {string} Formatted details HTML
+     */
+    formatLogDetails(log, index) {
+        const masterlistNumber = log.masterlistNumber || 'Unknown';
+        
+        // For non-edit logs, show simple format
+        if (log.type !== 'EDIT' || !log.changes || !Array.isArray(log.changes)) {
+            return this.escapeHtml(log.details || masterlistNumber);
+        }
+        
+        // For edit logs with changes
+        if (log.changes.length === 0) {
+            return this.escapeHtml(masterlistNumber);
+        } else if (log.changes.length === 1) {
+            // Single change - show inline with color formatting
+            const change = log.changes[0];
+            return `${this.escapeHtml(masterlistNumber)} ${this.formatSingleChange(change)}`;
+        } else {
+            // Multiple changes - show button
+            return `
+                ${this.escapeHtml(masterlistNumber)} 
+                <button class="btn btn-sm btn-outline multiple-edits-btn" 
+                        onclick="loggingPageManager.showMultipleEditsModal(${index})">
+                    <i class="fas fa-list"></i> Multiple edits (${log.changes.length})
+                </button>
+            `;
+        }
+    }
+
+    /**
+     * Show modal with multiple edits details
+     * @param {number} logIndex - Index of the log entry
+     */
+    showMultipleEditsModal(logIndex) {
+        const log = this.filteredLogs[logIndex];
+        if (!log || !log.changes || log.changes.length === 0) {
+            return;
+        }
+        
+        const modal = this.getOrCreateMultipleEditsModal();
+        const modalBody = modal.querySelector('.modal-body');
+        const modalTitle = modal.querySelector('.modal-title');
+        
+        modalTitle.textContent = `Character Edits - ${log.masterlistNumber || 'Unknown'}`;
+        
+        modalBody.innerHTML = `
+            <div class="changes-list">
+                ${log.changes.map(change => `
+                    <div class="change-item">
+                        <i class="fas fa-arrow-right change-icon"></i>
+                        <span class="change-text">${this.formatSingleChange(change)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        modal.style.display = 'block';
+    }
+    
+    /**
+     * Get or create the multiple edits modal
+     * @returns {HTMLElement} Modal element
+     */
+    getOrCreateMultipleEditsModal() {
+        let modal = document.getElementById('multipleEditsModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'multipleEditsModal';
+            modal.className = 'modal';
+            modal.style.display = 'none'; // Initially hidden
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Character Edits</h3>
+                        <button class="modal-close" onclick="loggingPageManager.closeMultipleEditsModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Changes will be populated here -->
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeMultipleEditsModal();
+                }
+            });
+        }
+        return modal;
+    }
+    
+    /**
+     * Close the multiple edits modal
+     */
+    closeMultipleEditsModal() {
+        const modal = document.getElementById('multipleEditsModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
 
     /**
@@ -280,6 +470,49 @@ class LoggingPageManager {
     }
 
     /**
+     * Format a single change object for display
+     * @param {Object} change - Change object with displayName, from, to properties
+     * @returns {string} HTML formatted change text
+     */
+    formatSingleChange(change) {
+        // If change has structured data, use it for better formatting
+        if (change && typeof change === 'object') {
+            const displayName = change.displayName || change.field || 'Field';
+            const fromValue = change.from || change.oldValue || '(empty)';
+            const toValue = change.to || change.newValue || '(empty)';
+            
+            return `<strong>${this.escapeHtml(displayName)}:</strong> <span class="change-old-value">${this.escapeHtml(fromValue)}</span> &rarr; <span class="change-new-value">${this.escapeHtml(toValue)}</span>`;
+        }
+        
+        // Fallback to changeText if available
+        if (change && change.changeText) {
+            return this.formatChangeTextWithColors(change.changeText);
+        }
+        
+        // Last resort - treat as string
+        return this.escapeHtml(String(change));
+    }
+
+    /**
+     * Format change text with color coding for old (red) and new (green) values
+     * @param {string} changeText - The change text to format
+     * @returns {string} HTML formatted change text
+     */
+    formatChangeTextWithColors(changeText) {
+        // Pattern to match "Field: OldValue --> NewValue" format
+        const changePattern = /^(.+?):\s*(.+?)\s*-->\s*(.+)$/;
+        const match = changeText.match(changePattern);
+        
+        if (match) {
+            const [, field, oldValue, newValue] = match;
+            return `<strong>${this.escapeHtml(field)}:</strong> <span class="change-old-value">${this.escapeHtml(oldValue.trim())}</span> &rarr; <span class="change-new-value">${this.escapeHtml(newValue.trim())}</span>`;
+        }
+        
+        // Fallback for non-standard format
+        return this.escapeHtml(changeText);
+    }
+
+    /**
      * Escape HTML to prevent XSS
      * @param {string} text - Text to escape
      * @returns {string} Escaped text
@@ -291,6 +524,129 @@ class LoggingPageManager {
     }
 
     /**
+     * Update pagination information display
+     */
+    updatePaginationInfo() {
+        const paginationInfo = document.getElementById('paginationInfo');
+        if (paginationInfo) {
+            const startItem = this.filteredLogs.length === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
+            const endItem = Math.min(this.currentPage * this.itemsPerPage, this.filteredLogs.length);
+            paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${this.filteredLogs.length} logs`;
+        }
+    }
+
+    /**
+     * Render pagination controls
+     */
+    renderPaginationControls() {
+        const paginationContainer = document.getElementById('paginationControls');
+        if (!paginationContainer) return;
+
+        if (this.totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = `
+            <div class="pagination">
+                <button class="btn btn-outline" ${this.currentPage === 1 ? 'disabled' : ''} onclick="loggingPageManager.goToPage(${this.currentPage - 1})">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span class="pagination-info">Page ${this.currentPage} of ${this.totalPages}</span>
+                <button class="btn btn-outline" ${this.currentPage === this.totalPages ? 'disabled' : ''} onclick="loggingPageManager.goToPage(${this.currentPage + 1})">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+
+        paginationContainer.innerHTML = paginationHTML;
+    }
+
+    /**
+     * Navigate to specific page
+     * @param {number} page - Page number to navigate to
+     */
+    goToPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.renderLogs();
+    }
+
+    /**
+     * Initialize Firebase for user lookups
+     * @returns {Promise<boolean>} Initialization success status
+     */
+    async initializeFirebase() {
+        try {
+            // Ensure Firebase config is initialized first
+            const configInitialized = await firebaseConfig.initialize();
+            if (!configInitialized) {
+                throw new Error('Firebase configuration failed');
+            }
+
+            // Import Firebase modules dynamically
+            const { getFirestore, collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+            
+            // Use the already initialized Firebase app
+            this.db = getFirestore(firebaseConfig.app);
+            
+            // Store Firestore functions for later use
+            this.firestoreFunctions = {
+                collection,
+                query,
+                where,
+                getDocs
+            };
+            
+            console.log('✅ Firebase initialized for user lookups');
+            return true;
+        } catch (error) {
+            console.error('❌ Failed to initialize Firebase for user lookups:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Get user email by username
+     * @param {string} username - Username to lookup
+     * @returns {Promise<string|null>} User email or null if not found
+     */
+    async getUserEmailByUsername(username) {
+        try {
+            // Check cache first
+            if (this.userCache.has(username)) {
+                return this.userCache.get(username);
+            }
+
+            if (!this.db || !this.firestoreFunctions) {
+                console.warn('⚠️ Firebase not initialized for user lookups');
+                return null;
+            }
+
+            const { collection, query, where, getDocs } = this.firestoreFunctions;
+            const usersRef = collection(this.db, 'users');
+            const q = query(usersRef, where('username', '==', username));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const userData = querySnapshot.docs[0].data();
+                const email = userData.email || null;
+                
+                // Cache the result
+                this.userCache.set(username, email);
+                return email;
+            }
+
+            // Cache null result to avoid repeated queries
+            this.userCache.set(username, null);
+            return null;
+        } catch (error) {
+            console.error('❌ Error fetching user email:', error);
+            return null;
+        }
+    }
+
+    /**
      * Clean up resources
      */
     destroy() {
@@ -298,6 +654,9 @@ class LoggingPageManager {
             this.realtimeUnsubscribe();
             this.realtimeUnsubscribe = null;
         }
+        
+        // Clear user cache
+        this.userCache.clear();
         
         console.log('🧹 Logging Page Manager destroyed');
     }
@@ -314,6 +673,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         loggingPageManager = new LoggingPageManager();
         const initialized = await loggingPageManager.initialize();
         
+        // Make globally accessible for onclick handlers
+        window.loggingPageManager = loggingPageManager;
+        
         if (!initialized) {
             console.error('❌ Failed to initialize logging page');
         }
@@ -327,6 +689,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 window.addEventListener('beforeunload', function() {
     if (loggingPageManager) {
         loggingPageManager.destroy();
+        window.loggingPageManager = null;
     }
 });
 

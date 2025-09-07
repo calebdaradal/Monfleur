@@ -289,7 +289,7 @@ class AuthenticationService {
      * @returns {boolean} Administrator status
      */
     isAdministrator() {
-        return this.currentUser && this.currentUser.role === 'administrator';
+        return this.currentUser && (this.currentUser.role === 'administrator' || this.currentUser.role === 'admin');
     }
 
     /**

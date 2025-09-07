@@ -208,8 +208,9 @@ class GoogleDriveImageHandler {
 // Character filter manager - Single Responsibility Principle
 class CharacterFilterManager {
     constructor(characters) {
-        this.allCharacters = characters;
-        this.filteredCharacters = [...characters];
+        // Sort characters by creation date (most recent first)
+        this.allCharacters = this.sortCharactersByDate(characters);
+        this.filteredCharacters = [...this.allCharacters];
     }
 
     /**
@@ -223,7 +224,8 @@ class CharacterFilterManager {
     applyFilters(filters) {
         const { search = '', rarity = 'all', status = 'all', biome = 'all' } = filters;
         
-        this.filteredCharacters = this.allCharacters.filter(character => {
+        // Filter characters first
+        const filtered = this.allCharacters.filter(character => {
             const matchesSearch = this.matchesSearchQuery(character, search);
             const matchesRarity = rarity === 'all' || character.rarity === rarity;
             const matchesStatus = status === 'all' || character.status === status;
@@ -231,6 +233,9 @@ class CharacterFilterManager {
             
             return matchesSearch && matchesRarity && matchesStatus && matchesBiome;
         });
+        
+        // Maintain date sorting after filtering
+        this.filteredCharacters = this.sortCharactersByDate(filtered);
         
         return this.filteredCharacters;
     }
@@ -260,8 +265,25 @@ class CharacterFilterManager {
      * @param {Array} characters - New character list
      */
     updateCharacters(characters) {
-        this.allCharacters = characters;
-        this.filteredCharacters = [...characters];
+        // Sort characters by creation date (most recent first)
+        this.allCharacters = this.sortCharactersByDate(characters);
+        this.filteredCharacters = [...this.allCharacters];
+    }
+
+    /**
+     * Sort characters by creation date (most recent first)
+     * @param {Array} characters - Characters to sort
+     * @returns {Array} Sorted characters
+     */
+    sortCharactersByDate(characters) {
+        return [...characters].sort((a, b) => {
+            // Handle cases where createdAt might not exist
+            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+            
+            // Sort in descending order (most recent first)
+            return dateB - dateA;
+        });
     }
 }
 
@@ -272,6 +294,11 @@ class CharacterDatabaseApp {
         this.filterManager = null;
         this.currentView = 'grid';
         this.isLoading = true;
+        
+        // Pagination properties
+        this.currentPage = 1;
+        this.itemsPerPage = 6;
+        this.totalPages = 1;
         
         this.init();
     }
@@ -420,6 +447,9 @@ class CharacterDatabaseApp {
         };
         
         this.filterManager.applyFilters(filters);
+        
+        // Reset to first page when filters change
+        this.currentPage = 1;
         this.renderCharacters();
         this.updateResultsCount();
     }
@@ -440,6 +470,7 @@ class CharacterDatabaseApp {
                     <div class="loading-spinner-modern"></div>
                 </div>
             `;
+            this.updatePaginationInfo();
             return;
         }
         
@@ -447,10 +478,21 @@ class CharacterDatabaseApp {
         
         if (characters.length === 0) {
             container.innerHTML = '<p class="text-muted-foreground">No characters found matching your criteria.</p>';
+            this.updatePaginationInfo();
             return;
         }
         
-        container.innerHTML = characters.map(character => this.renderCharacterCard(character)).join('');
+        // Calculate pagination
+        this.totalPages = Math.ceil(characters.length / this.itemsPerPage);
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const paginatedCharacters = characters.slice(startIndex, endIndex);
+        
+        container.innerHTML = paginatedCharacters.map(character => this.renderCharacterCard(character)).join('');
+        
+        // Update pagination controls
+        this.updatePaginationInfo();
+        this.renderPaginationControls();
     }
 
     /**
@@ -769,6 +811,56 @@ class CharacterDatabaseApp {
             confirmBtn.innerHTML = originalText;
             confirmBtn.disabled = false;
         }
+    }
+
+    /**
+     * Update pagination information display
+     */
+    updatePaginationInfo() {
+        const paginationInfo = document.getElementById('paginationInfo');
+        if (paginationInfo && this.filterManager) {
+            const totalCharacters = this.filterManager.filteredCharacters.length;
+            const startItem = totalCharacters === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
+            const endItem = Math.min(this.currentPage * this.itemsPerPage, totalCharacters);
+            paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${totalCharacters} characters`;
+        }
+    }
+
+    /**
+     * Render pagination controls
+     */
+    renderPaginationControls() {
+        const paginationContainer = document.getElementById('paginationControls');
+        if (!paginationContainer) return;
+
+        if (this.totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = `
+            <div class="pagination">
+                <button class="btn btn-outline" ${this.currentPage === 1 ? 'disabled' : ''} onclick="app.goToPage(${this.currentPage - 1})">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span class="pagination-info">Page ${this.currentPage} of ${this.totalPages}</span>
+                <button class="btn btn-outline" ${this.currentPage === this.totalPages ? 'disabled' : ''} onclick="app.goToPage(${this.currentPage + 1})">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+
+        paginationContainer.innerHTML = paginationHTML;
+    }
+
+    /**
+     * Navigate to specific page
+     * @param {number} page - Page number to navigate to
+     */
+    goToPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.renderCharacters();
     }
 
     /**

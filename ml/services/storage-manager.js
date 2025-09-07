@@ -106,13 +106,14 @@ class EnhancedCharacterStorageManager {
      * Update existing character
      * @param {string} id - Character ID
      * @param {Object} updates - Updated data
+     * @param {Object} originalData - Original character data for comparison
      * @returns {Promise<boolean>} Success status
      * @throws {Error} When update operation fails
      */
-    async updateCharacter(id, updates) {
+    async updateCharacter(id, updates, originalData = null) {
         await this.ensureInitialized();
         try {
-            return await this.characterService.updateCharacter(id, updates);
+            return await this.characterService.updateCharacter(id, updates, originalData);
         } catch (error) {
             throw new Error(`Failed to update character: ${error.message}`);
         }

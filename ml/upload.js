@@ -18,6 +18,7 @@ import toastManager from './components/toast.js';
 
 // Global variables
 let storageManager;
+let originalCharacterData = null; // Store original character data for edit comparison
 
 /**
  * Debounce function to limit function calls
@@ -194,7 +195,7 @@ async function handleFormSubmit(event) {
         
         let success;
         if (editId) {
-            success = await storageManager.updateCharacter(editId, characterData);
+            success = await storageManager.updateCharacter(editId, characterData, originalCharacterData);
         } else {
             success = await storageManager.addCharacter(characterData);
         }
@@ -202,25 +203,15 @@ async function handleFormSubmit(event) {
         if (success) {
             // Show toast notification for successful operation
             toastManager.showSuccess(editId ? 'Character updated successfully!' : 'Character uploaded successfully!');
-            resetForm();
             
-            // Clear edit mode from URL after successful update
             if (editId) {
-                const url = new URL(window.location);
-                url.searchParams.delete('edit');
-                window.history.replaceState({}, '', url);
-                
-                // Update page title back to default
-                const pageTitle = document.querySelector('h1');
-                if (pageTitle) {
-                    pageTitle.textContent = 'Upload Character';
-                }
-                
-                // Update submit button text back to default
-                const submitBtn = document.querySelector('.character-form button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Character';
-                }
+                // Navigate back to database after successful update
+                setTimeout(() => {
+                    window.location.href = 'database.html';
+                }, 1500); // Give time for toast to be seen
+            } else {
+                // Reset form for new uploads
+                resetForm();
             }
         }
     } catch (error) {
@@ -575,6 +566,9 @@ function loadCharacterForEdit(character) {
     const form = document.querySelector('.character-form');
     if (!form) return;
     
+    // Store original character data for comparison when saving
+    originalCharacterData = JSON.parse(JSON.stringify(character));
+    
     // Extract digits from masterlist number (remove ML- prefix)
     const masterlistDigits = character.masterlistNumber ? 
         character.masterlistNumber.replace(/^ML-/, '') : '';
@@ -627,6 +621,9 @@ function resetForm() {
         form.reset();
         previewCharacter();
         updateImageUrlStatus('', 'neutral');
+        
+        // Clear original character data
+        originalCharacterData = null;
         
         // Clear any error messages
         const errorContainer = document.getElementById('formErrors');

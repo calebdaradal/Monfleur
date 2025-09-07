@@ -2225,6 +2225,158 @@ body {
     }
 }
 
+/* Multiple Edits Modal Styles */
+.multiple-edits-btn {
+    background-color: var(--secondary);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.multiple-edits-btn:hover {
+    background-color: var(--muted);
+    border-color: var(--primary);
+}
+
+.multiple-edits-btn i {
+    font-size: 0.7rem;
+}
+
+/* Pagination Styles */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.pagination-info {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pagination .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.pagination .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pagination .pagination-info {
+    font-weight: 500;
+    color: var(--foreground);
+    margin: 0;
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .pagination .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+}
+
+#multipleEditsModal .modal-content {
+    max-width: 600px;
+    width: 90%;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 1000;
+    margin: 0 !important;
+}
+
+#multipleEditsModal .modal-header {
+    background-color: var(--primary);
+    color: white;
+}
+
+#multipleEditsModal .modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+}
+
+#multipleEditsModal .modal-header h3::before {
+    content: "\f044";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+.changes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.change-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+}
+
+.change-item:hover {
+    background-color: var(--secondary);
+    border-color: var(--primary);
+}
+
+.change-icon {
+    color: var(--primary);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.change-text {
+    font-size: 0.875rem;
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.change-old-value {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.change-new-value {
+    color: #28a745;
+    font-weight: 500;
+}
+
 /* Responsive Modal */
 @media (max-width: 768px) {
     .image-modal-content {
@@ -2249,4 +2401,70 @@ body {
     .image-modal-body img {
         max-height: 60vh;
     }
+    
+    #multipleEditsModal .modal-content {
+        width: 95%;
+        max-width: none;
+    }
+    
+    .change-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .change-icon {
+        align-self: flex-start;
+    }
+}
+
+/* Username Hover Tooltip Styles */
+.hoverable-username {
+    position: relative;
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+}
+
+.hoverable-username:hover {
+    color: #0056b3;
+}
+
+.email-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 1000;
+    margin-bottom: 5px;
+}
+
+.email-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+}
+
+.email-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Ensure tooltip appears above table content */
+.logs-table tbody td {
+    position: relative;
 }

@@ -103,12 +103,13 @@ class CharacterService {
      * Update existing character
      * @param {string} id - Character ID
      * @param {Object} updates - Updated data
+     * @param {Object} originalData - Original character data for comparison (optional)
      * @returns {Promise<boolean>} Success status
      */
-    async updateCharacter(id, updates) {
+    async updateCharacter(id, updates, originalData = null) {
         try {
-            // Get existing character for logging purposes
-            const existingCharacter = await this.repository.getCharacterById(id);
+            // Use provided original data or get existing character for logging purposes
+            const existingCharacter = originalData || await this.repository.getCharacterById(id);
             if (!existingCharacter) {
                 throw new Error('Character not found');
             }
@@ -124,9 +125,12 @@ class CharacterService {
                 await this.checkDuplicateMasterlistNumber(updates.masterlistNumber, id);
             }
 
+            // Compare changes for detailed logging
+            const changes = this.compareCharacterChanges(existingCharacter, updates);
+
             const result = await this.repository.updateCharacter(id, updates);
 
-            // Log the character update activity
+            // Log the character update activity with detailed changes
             try {
                 // Ensure authentication service is initialized
                 if (!authenticationService.isInitialized) {
@@ -135,11 +139,17 @@ class CharacterService {
                 const currentUser = authenticationService.getCurrentUser();
                 const username = currentUser ? (currentUser.username || currentUser.email || 'Unknown User') : 'Unknown User';
                 const masterlistNumber = updates.masterlistNumber || existingCharacter.masterlistNumber;
+                
+                // Create detailed log entry with changes
                 await loggingService.logCharacterActivity(
                     'EDIT',
                     username,
                     masterlistNumber,
-                    { characterId: id }
+                    { 
+                        characterId: id,
+                        changes: changes,
+                        hasMultipleChanges: changes.length > 1
+                    }
                 );
             } catch (logError) {
                 console.warn('⚠️ Failed to log character update:', logError);
@@ -267,32 +277,89 @@ class CharacterService {
     }
 
     /**
+     * Compare character changes for detailed logging
+     * @param {Object} originalCharacter - Original character data
+     * @param {Object} updates - Updated character data
+     * @returns {Array} Array of change objects
+     */
+    compareCharacterChanges(originalCharacter, updates) {
+        const changes = [];
+        
+        // Define trackable fields with their display names
+        const trackableFields = {
+            owner: 'Owner',
+            artist: 'Artist',
+            primaryBiome: 'Primary Biome',
+            secondaryBiome: 'Secondary Biome',
+            rarity: 'Rarity',
+            status: 'Status',
+            description: 'Description',
+            traits: 'Traits',
+            notes: 'Notes',
+            value: 'Value',
+            masterlistNumber: 'Masterlist Number'
+        };
+        
+        // Compare each trackable field
+        Object.entries(trackableFields).forEach(([fieldKey, displayName]) => {
+            const originalValue = originalCharacter[fieldKey] || '';
+            const newValue = updates[fieldKey] || '';
+            
+            // Only track actual changes (ignore empty to empty)
+            if (originalValue !== newValue && !(originalValue === '' && newValue === '')) {
+                changes.push({
+                    field: fieldKey,
+                    displayName: displayName,
+                    from: originalValue || '(empty)',
+                    to: newValue || '(empty)',
+                    changeText: `${displayName}: ${originalValue || '(empty)'} --> ${newValue || '(empty)'}`
+                });
+            }
+        });
+        
+        return changes;
+    }
+
+    /**
      * Apply filters to character list
      * @param {Array} characters - Characters to filter
      * @param {Object} filters - Filter criteria
      * @returns {Array} Filtered characters
      */
     applyFilters(characters, filters) {
-        let filtered = [...characters];
-        
-        if (filters.search) {
-            const searchTerm = filters.search.toLowerCase();
-            filtered = filtered.filter(char => 
-                char.masterlistNumber?.toLowerCase().includes(searchTerm) ||
-                char.owner?.toLowerCase().includes(searchTerm) ||
-                char.artist?.toLowerCase().includes(searchTerm)
-            );
+        if (!filters || Object.keys(filters).length === 0) {
+            return characters;
         }
-        
-        if (filters.rarity && filters.rarity !== 'all') {
-            filtered = filtered.filter(char => char.rarity === filters.rarity);
-        }
-        
-        if (filters.status && filters.status !== 'all') {
-            filtered = filtered.filter(char => char.status === filters.status);
-        }
-        
-        return filtered;
+
+        return characters.filter(character => {
+            // Apply rarity filter
+            if (filters.rarity && filters.rarity !== 'all' && character.rarity !== filters.rarity) {
+                return false;
+            }
+
+            // Apply status filter
+            if (filters.status && filters.status !== 'all' && character.status !== filters.status) {
+                return false;
+            }
+
+            // Apply search filter
+            if (filters.search) {
+                const searchTerm = filters.search.toLowerCase();
+                const searchableFields = [
+                    character.masterlistNumber,
+                    character.owner,
+                    character.artist,
+                    character.primaryBiome,
+                    character.secondaryBiome
+                ].filter(Boolean).join(' ').toLowerCase();
+                
+                if (!searchableFields.includes(searchTerm)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
     }
 }
 

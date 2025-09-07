@@ -311,15 +311,62 @@ class LoggingService {
      */
     exportToCSV(logs) {
         try {
-            const headers = ['Timestamp', 'Type', 'User', 'Details'];
+            const headers = ['Timestamp', 'Type', 'User', 'Character', 'Changes'];
             const csvContent = [
                 headers.join(','),
-                ...logs.map(log => [
-                    `"${this.formatTimestamp(log.timestamp)}"`,
-                    `"${log.type || ''}"`,
-                    `"${log.user || ''}"`,
-                    `"${log.details || log.masterlistNumber || ''}"`
-                ].join(','))
+                ...logs.map(log => {
+                    // Format detailed changes for CSV
+                    let changesText = '';
+                    
+                    if (log.changes && Array.isArray(log.changes) && log.changes.length > 0) {
+                        // Multiple changes
+                        changesText = log.changes.map(change => {
+                            if (typeof change === 'object' && change !== null) {
+                                // Use displayName for better readability
+                                const fieldName = change.displayName || change.field || 'Field';
+                                const fromValue = change.from || change.oldValue || '(empty)';
+                                const toValue = change.to || change.newValue || '(empty)';
+                                
+                                if (fromValue !== undefined && toValue !== undefined) {
+                                    return `${fieldName}: ${fromValue} --> ${toValue}`;
+                                }
+                                return change.changeText || change.text || JSON.stringify(change);
+                            }
+                            return String(change);
+                        }).join('; ');
+                    } else if (log.changes && typeof log.changes === 'string') {
+                        // Single change as string
+                        changesText = log.changes;
+                    } else if (log.changes && typeof log.changes === 'object' && log.changes !== null) {
+                        // Handle single object change
+                        try {
+                            const fieldName = log.changes.displayName || log.changes.field || 'Field';
+                            const fromValue = log.changes.from || log.changes.oldValue;
+                            const toValue = log.changes.to || log.changes.newValue;
+                            
+                            if (fromValue !== undefined && toValue !== undefined) {
+                                changesText = `${fieldName}: ${fromValue} --> ${toValue}`;
+                            } else if (log.changes.changeText) {
+                                changesText = log.changes.changeText;
+                            } else {
+                                changesText = JSON.stringify(log.changes);
+                            }
+                        } catch (e) {
+                            changesText = '[Complex Object]';
+                        }
+                    } else if (log.details) {
+                        // Fallback to details
+                        changesText = String(log.details);
+                    }
+                    
+                    return [
+                        `"${this.formatTimestamp(log.timestamp)}"`,
+                        `"${log.type || ''}"`,
+                        `"${log.user || ''}"`,
+                        `"${log.masterlistNumber || ''}"`,
+                        `"${String(changesText).replace(/"/g, '""')}"`  // Escape quotes in CSV
+                    ].join(',');
+                })
             ].join('\n');
 
             return csvContent;
