@@ -121,6 +121,97 @@ class LoggingService {
     }
 
     /**
+     * Log user-related activity
+     * @param {string} actionType - Type of action (EDIT, CREATE, DELETE, etc.)
+     * @param {string} performedBy - Username performing the action
+     * @param {string} targetUser - Target user (for admin actions) or same as performedBy (for self actions)
+     * @param {Object} additionalData - Optional additional data
+     * @returns {Promise<boolean>} Success status
+     */
+    async logUserActivity(actionType, performedBy, targetUser, additionalData = {}) {
+        try {
+            if (!this.isInitialized) {
+                console.warn('⚠️ Logging Service not initialized, attempting to initialize...');
+                const initialized = await this.initialize();
+                if (!initialized) {
+                    throw new Error('Failed to initialize logging service');
+                }
+            }
+
+            // Validate action type
+            const validActionTypes = ['EDIT', 'CREATE', 'DELETE', 'USER_EDIT', 'PASSWORD_CHANGE', 'ROLE_CHANGE', 'ADMIN_EDIT'];
+            if (!validActionTypes.includes(actionType)) {
+                throw new Error(`Invalid action type: ${actionType}. Must be one of: ${validActionTypes.join(', ')}`);
+            }
+
+            // Create log entry with user-friendly details
+            let details = '';
+            switch (actionType) {
+                case 'USER_EDIT':
+                    const oldUsername = additionalData.oldUsername || 'Unknown';
+                    const newUsername = additionalData.newUsername || 'Unknown';
+                    details = `Username changed from "${oldUsername}" to "${newUsername}"`;
+                    break;
+                case 'PASSWORD_CHANGE':
+                    details = 'Password updated';
+                    break;
+                case 'ROLE_CHANGE':
+                    const oldRole = additionalData.oldRole || 'Unknown';
+                    const newRole = additionalData.newRole || 'Unknown';
+                    details = `Role changed from "${oldRole}" to "${newRole}"`;
+                    break;
+                case 'ADMIN_EDIT':
+                    if (additionalData.action === 'status_change') {
+                        const newStatus = additionalData.newStatus ? 'Active' : 'Inactive';
+                        details = `"${targetUser}" Account status changed to ${newStatus}`;
+                    } else if (additionalData.action === 'create') {
+                        details = `Created user account "${targetUser}"`;
+                    } else if (additionalData.action === 'delete') {
+                        details = `Deleted account "${targetUser}"`;
+                    } else {
+                        details = additionalData.details || `Admin action performed on "${targetUser}"`;
+                    }
+                    break;
+                case 'CREATE':
+                    details = `Created user account "${targetUser}"`;
+                    break;
+                case 'DELETE':
+                    details = `Deleted account "${targetUser}"`;
+                    break;
+                case 'EDIT':
+                    details = additionalData.details || 'User profile updated';
+                    break;
+                default:
+                    details = additionalData.details || `${actionType} action performed`;
+            }
+
+            const logEntry = {
+                timestamp: new Date().toISOString(),
+                type: actionType,
+                user: performedBy || 'Unknown User',
+                targetUser: targetUser || performedBy || 'Unknown User',
+                details: details,
+                category: 'USER',
+                ...additionalData
+            };
+
+            // Push to Firebase Realtime Database
+            const { ref, push, set } = this.databaseFunctions;
+            const logsRef = ref(this.database, 'actionlogs');
+            const newLogRef = push(logsRef);
+            
+            await set(newLogRef, logEntry);
+            
+            console.log(`📝 Logged ${actionType} activity for user ${targetUser} by ${performedBy}`);
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Failed to log user activity:', error);
+            return false;
+        }
+    }
+
+    /**
      * Get all logs with optional filtering
      * @param {Object} filters - Filter criteria
      * @returns {Promise<Array>} Array of log entries

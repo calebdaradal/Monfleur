@@ -78,12 +78,6 @@ class LoggingPageManager {
      * Setup event listeners for filters and controls
      */
     setupEventListeners() {
-        // Type filter
-        const typeFilter = document.getElementById('logTypeFilter');
-        if (typeFilter) {
-            typeFilter.addEventListener('change', () => this.applyFilters());
-        }
-
         // Date filter
         const dateFilter = document.getElementById('logDateFilter');
         if (dateFilter) {
@@ -96,6 +90,30 @@ class LoggingPageManager {
             exportBtn.removeAttribute('onclick');
             exportBtn.addEventListener('click', () => this.exportLogs());
         }
+        
+        // Set up toggle button listeners
+        this.setupToggleButtonListeners();
+    }
+    
+    /**
+     * Setup event listeners for toggle filter buttons
+     */
+    setupToggleButtonListeners() {
+        const toggleButtons = document.querySelectorAll('.log-type-toggle');
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                button.classList.toggle('active');
+                
+                // If no buttons are active, reactivate all (acts as "All" functionality)
+                const activeButtons = document.querySelectorAll('.log-type-toggle.active');
+                if (activeButtons.length === 0) {
+                    toggleButtons.forEach(btn => btn.classList.add('active'));
+                }
+                
+                this.applyFilters();
+            });
+        });
     }
 
     /**
@@ -140,12 +158,24 @@ class LoggingPageManager {
      * Apply current filters to logs
      */
     applyFilters() {
-        const typeFilter = document.getElementById('logTypeFilter')?.value || 'all';
         const dateFilter = document.getElementById('logDateFilter')?.value || 'all';
-
-        // Apply filters using the logging service
-        this.filteredLogs = loggingService.applyFilters(this.logs, {
-            type: typeFilter,
+        
+        // Get active log types from toggle buttons
+        const activeToggleButtons = document.querySelectorAll('.log-type-toggle.active');
+        const activeTypes = Array.from(activeToggleButtons).map(button => button.dataset.type);
+        
+        // Start with all logs
+        let filteredLogs = [...this.logs];
+        
+        // Apply type filter if specific types are selected
+        if (activeTypes.length > 0 && activeTypes.length < document.querySelectorAll('.log-type-toggle').length) {
+            filteredLogs = filteredLogs.filter(log => 
+                activeTypes.includes(log.type)
+            );
+        }
+        
+        // Apply date filter using the logging service
+        this.filteredLogs = loggingService.applyFilters(filteredLogs, {
             dateRange: dateFilter
         });
 
@@ -381,6 +411,10 @@ class LoggingPageManager {
                 return 'upload';
             case 'EDIT':
                 return 'edit';
+            case 'USER_EDIT':
+                return 'user_edit';
+            case 'ADMIN_EDIT':
+                return 'admin_edit';
             case 'DELETE':
                 return 'delete';
             default:

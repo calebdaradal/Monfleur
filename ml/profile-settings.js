@@ -9,6 +9,7 @@
 
 import firebaseConfig from './config/firebase-config.js';
 import AuthenticationService from './services/authentication-service.js';
+import LoggingService from './services/logging-service.js';
 
 /**
  * Profile Settings System Class
@@ -523,8 +524,14 @@ class ProfileSettingsUI {
         try {
             this.setFormLoadingState(true);
             
+            // Get current profile data for logging purposes
+            const currentProfile = this.profileSystem.getCurrentUserProfile();
+            const oldUsername = currentProfile ? currentProfile.username : 'Unknown';
+            const newUsername = this.usernameInput.value.trim();
+            const isUsernameChanged = oldUsername !== newUsername;
+            
             const profileData = {
-                username: this.usernameInput.value.trim()
+                username: newUsername
             };
             
             // Add password hash if password is being changed
@@ -550,6 +557,41 @@ class ProfileSettingsUI {
             }
             
             await this.profileSystem.updateProfile(profileData);
+            
+            // Log username change if it occurred
+            if (isUsernameChanged) {
+                try {
+                    await LoggingService.logUserActivity(
+                        'USER_EDIT',
+                        newUsername, // performed by
+                        newUsername, // target user (same as performer for self-edit)
+                        {
+                            oldUsername: oldUsername,
+                            newUsername: newUsername
+                        }
+                    );
+                    console.log('✅ Username change logged successfully');
+                } catch (logError) {
+                    console.error('⚠️ Failed to log username change:', logError);
+                    // Don't fail the entire operation if logging fails
+                }
+            }
+            
+            // Log password change if it occurred
+            if (isPasswordChange && newUsername) {
+                try {
+                    await LoggingService.logUserActivity(
+                        'PASSWORD_CHANGE',
+                        newUsername, // performed by
+                        newUsername, // target user (same as performer for self-edit)
+                        {}
+                    );
+                    console.log('✅ Password change logged successfully');
+                } catch (logError) {
+                    console.error('⚠️ Failed to log password change:', logError);
+                    // Don't fail the entire operation if logging fails
+                }
+            }
             
             if (isPasswordChange) {
                 this.showAlert('Profile and password updated successfully!', 'success');

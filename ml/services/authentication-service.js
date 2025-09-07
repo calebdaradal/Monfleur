@@ -98,12 +98,12 @@ class AuthenticationService {
                 };
             }
 
-            // Check if account is active
+            // Check if account is active - return same error as invalid credentials for security
             if (!user.active) {
                 return {
                     success: false,
-                    error: 'Account is inactive. Please contact an administrator.',
-                    code: 'ACCOUNT_INACTIVE'
+                    error: 'Invalid email or password',
+                    code: 'INVALID_CREDENTIALS'
                 };
             }
 

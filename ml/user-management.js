@@ -7,6 +7,7 @@
 // Import Firebase modules and configuration
 import firebaseConfig from './config/firebase-config.js';
 import AuthenticationService from './services/authentication-service.js';
+import LoggingService from './services/logging-service.js';
 
 /**
  * User Management Class
@@ -1101,13 +1102,130 @@ class UserManagementUI {
         
         try {
             let result;
+            const currentAdmin = this.userManagement.getCurrentUser();
+            const adminUsername = currentAdmin ? currentAdmin.username : 'Unknown Admin';
             
             if (isEditMode) {
+                // Get original user data for logging comparison
+                const originalUser = this.userManagement.users.find(u => u.uid === this.editingUserId);
+                
                 // Update existing user
                 result = await this.userManagement.updateUser(this.editingUserId, userData);
+                
+                if (result.success) {
+                    // Log user edit action
+                    try {
+                        const logPromises = [];
+                        
+                        // Log username change if it occurred
+                        if (originalUser && originalUser.username !== userData.username) {
+                            logPromises.push(
+                                LoggingService.logUserActivity(
+                                    'USER_EDIT',
+                                    adminUsername,
+                                    userData.username,
+                                    {
+                                        oldUsername: originalUser.username,
+                                        newUsername: userData.username,
+                                        performedByAdmin: true
+                                    }
+                                )
+                            );
+                        }
+                        
+                        // Log role change if it occurred
+                        if (originalUser && originalUser.role !== userData.role) {
+                            logPromises.push(
+                                LoggingService.logUserActivity(
+                                    'ROLE_CHANGE',
+                                    adminUsername,
+                                    userData.username,
+                                    {
+                                        oldRole: originalUser.role,
+                                        newRole: userData.role,
+                                        performedByAdmin: true
+                                    }
+                                )
+                            );
+                        }
+                        
+                        // Log status change if it occurred
+                        if (originalUser && originalUser.active !== userData.active) {
+                            logPromises.push(
+                                LoggingService.logUserActivity(
+                                    'ADMIN_EDIT',
+                                    adminUsername,
+                                    userData.username,
+                                    {
+                                        action: 'status_change',
+                                        newStatus: userData.active,
+                                        performedByAdmin: true
+                                    }
+                                )
+                            );
+                        }
+                        
+                        // Log password change if password was provided
+                        if (userData.password) {
+                            logPromises.push(
+                                LoggingService.logUserActivity(
+                                    'PASSWORD_CHANGE',
+                                    adminUsername,
+                                    userData.username,
+                                    {
+                                        performedByAdmin: true
+                                    }
+                                )
+                            );
+                        }
+                        
+                        // If no specific changes were logged, log a general edit
+                        if (logPromises.length === 0) {
+                            logPromises.push(
+                                LoggingService.logUserActivity(
+                                    'EDIT',
+                                    adminUsername,
+                                    userData.username,
+                                    {
+                                        details: 'User profile updated by admin',
+                                        performedByAdmin: true
+                                    }
+                                )
+                            );
+                        }
+                        
+                        await Promise.all(logPromises);
+                        console.log('✅ User edit actions logged successfully');
+                    } catch (logError) {
+                        console.error('⚠️ Failed to log user edit actions:', logError);
+                        // Don't fail the entire operation if logging fails
+                    }
+                }
             } else {
                 // Create new user
                 result = await this.userManagement.createUser(userData);
+                
+                if (result.success) {
+                    // Log user creation
+                    try {
+                        await LoggingService.logUserActivity(
+                            'ADMIN_EDIT',
+                            adminUsername,
+                            userData.username,
+                            {
+                                action: 'create',
+                                email: userData.email,
+                                role: userData.role,
+                                active: userData.active,
+                                performedByAdmin: true
+                            }
+                        );
+                        console.log('✅ User creation logged successfully');
+                    } catch (logError) {
+                        console.error('⚠️ Failed to log user creation:', logError);
+                        // Don't fail the entire operation if logging fails
+                    }
+                }
             }
             
             if (result.success) {
@@ -1273,6 +1391,11 @@ class UserManagementUI {
         console.log('Attempting to delete user:', this.userToDelete);
         
         try {
+            // Get user data before deletion for logging
+            const deletedUser = this.userManagement.users.find(u => u.uid === this.userToDelete);
+            const deletedUsername = deletedUser ? deletedUser.username : 'Unknown';
+            const deletedUserEmail = deletedUser ? deletedUser.email : 'Unknown';
+            
             // Show loading state
             const confirmButton = document.getElementById('confirmDelete');
             const originalText = confirmButton.innerHTML;
@@ -1294,6 +1417,28 @@ class UserManagementUI {
                     } else if (deletedFromFirestore && !deletedFromAuth) {
                         message += ' (Removed from Database only - Auth user may not have existed)';
                     }
+                }
+                
+                // Log the user deletion action
+                try {
+                    const currentUser = this.userManagement.getCurrentUser();
+                    
+                    if (currentUser && currentUser.username) {
+                        await LoggingService.logUserActivity(
+                            'ADMIN_EDIT',
+                            currentUser.username,
+                            deletedUsername,
+                            {
+                                action: 'delete',
+                                deletedUserId: this.userToDelete,
+                                deletedUserEmail: deletedUserEmail,
+                                adminAction: true,
+                                deletionDetails: result.message || result.error || 'User deletion processed'
+                            }
+                        );
+                    }
+                } catch (loggingError) {
+                    console.error('Failed to log user deletion:', loggingError);
                 }
                 
                 // Show warning if present (for fallback method)

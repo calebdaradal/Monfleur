@@ -270,13 +270,13 @@ class AuthenticationManager {
                 };
             }
             
-            // Check if account is active
-            if (user.status && user.status !== 'active') {
-                console.log('❌ DEBUG: Account is not active, status:', user.status);
+            // Check if account is active - return same error as invalid credentials for security
+            if ((user.status && user.status !== 'active') || (user.active === false)) {
+                console.log('❌ DEBUG: Account is not active, status:', user.status, 'active:', user.active);
                 return {
                     success: false,
-                    error: 'Account is not active',
-                    code: 'auth/account-disabled'
+                    error: 'Invalid email/username or password',
+                    code: 'auth/invalid-credentials'
                 };
             }
             
